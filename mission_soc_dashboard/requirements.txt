@@ -1,0 +1,9 @@
+# Mission SoC Dashboard 실행 의존성
+# 지나치게 엄격한 고정 대신 호환 가능한 하한/상한을 지정한다.
+
+PySide6>=6.5,<7.0
+pyserial>=3.5,<4.0
+pyqtgraph>=0.13,<0.15
+
+# 테스트
+pytest>=7.4,<9.0

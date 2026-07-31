@@ -1,0 +1,10 @@
+
+
+OPTION psf_version = 2.1;
+
+BEGIN DRIVER fault_manager_ip
+	OPTION supported_peripherals = (fault_manager_ip);
+	OPTION copyfiles = all;
+	OPTION VERSION = 1.0;
+	OPTION NAME = fault_manager_ip;
+END DRIVER

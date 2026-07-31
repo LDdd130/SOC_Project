@@ -1,0 +1,23 @@
+* text=auto
+
+# Vivado/Vitis binary artifacts
+*.xsa binary
+*.dcp binary
+
+# Keep source/config files stable across Linux and Windows clones
+*.v text eol=lf
+*.sv text eol=lf
+*.vhd text eol=lf
+*.xdc text eol=lf
+*.xci text eol=lf
+*.xpr text eol=lf
+*.bd text eol=lf
+*.bda text eol=lf
+*.tcl text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.py text eol=lf
+*.cmake text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf

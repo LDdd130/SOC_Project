@@ -1,0 +1,65 @@
+# OS / editor / local tooling
+.DS_Store
+Thumbs.db
+.obsidian/
+graphify-out/
+**/graphify-out/
+
+# Python local environment and caches
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+*.py[cod]
+
+# Runtime logs and captures
+*.log
+*.jou
+*.str
+*.csv
+
+# Vivado generated outputs
+**/.Xil/
+SOC_Pr/soc_project/soc_project.cache/
+SOC_Pr/soc_project/soc_project.hw/
+SOC_Pr/soc_project/soc_project.ip_user_files/
+SOC_Pr/soc_project/soc_project.runs/
+SOC_Pr/soc_project/soc_project.sim/
+SOC_Pr/soc_project/soc_project.tmp/
+SOC_Pr/soc_project/soc_project.gen/*
+!SOC_Pr/soc_project/soc_project.gen/sources_1/
+SOC_Pr/soc_project/soc_project.gen/sources_1/*
+!SOC_Pr/soc_project/soc_project.gen/sources_1/bd/
+SOC_Pr/soc_project/soc_project.gen/sources_1/bd/*
+!SOC_Pr/soc_project/soc_project.gen/sources_1/bd/mission_soc/
+SOC_Pr/soc_project/soc_project.gen/sources_1/bd/mission_soc/*
+!SOC_Pr/soc_project/soc_project.gen/sources_1/bd/mission_soc/hdl/
+SOC_Pr/soc_project/soc_project.gen/sources_1/bd/mission_soc/hdl/*
+!SOC_Pr/soc_project/soc_project.gen/sources_1/bd/mission_soc/hdl/mission_soc_wrapper.v
+
+# Vitis generated outputs and Linux-specific workspace data
+SOC_Pr_Vitis/_ide/
+SOC_Pr_Vitis/.rigel_lopper/
+SOC_Pr_Vitis/**/build/
+SOC_Pr_Vitis/**/export/
+SOC_Pr_Vitis/**/_ide/
+SOC_Pr_Vitis/**/microblaze_riscv_0/
+SOC_Pr_Vitis/**/resources/
+SOC_Pr_Vitis/**/hw/
+SOC_Pr_Vitis/**/.cache/
+SOC_Pr_Vitis/**/.compile_commands/
+SOC_Pr_Vitis/**/compile_commands.json
+SOC_Pr_Vitis/fault_manager/
+SOC_Pr_Vitis/fault_manager_ip/
+SOC_Pr_Vitis/soc_prj/src/app.yaml
+*.bak
+
+# Presentation/source captures are not required to rebuild or run the project
+/Mission_SoC_*.pptx
+/Mission_SoC_Canva_Draft_v3.html
+/image*.png
+/verification/**/*.png
+/docs/gen_policy.py
+
+# Legacy bring-up/reference copies; the active copies live in SOC_Pr/SOC_Pr_Vitis
+/sw/
+/constraints/

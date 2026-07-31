@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mission-soc-dashboard"
+version = "1.0.0"
+description = "Basys 3 MicroBlaze SoC 실시간 관제용 데스크톱 애플리케이션"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+dependencies = [
+    "PySide6>=6.5,<7.0",
+    "pyserial>=3.5,<4.0",
+    "pyqtgraph>=0.13,<0.15",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4,<9.0"]
+
+[project.scripts]
+mission-soc-dashboard = "mission_dashboard.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["mission_dashboard*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-v --tb=short"
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
