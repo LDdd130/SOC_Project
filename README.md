@@ -90,7 +90,7 @@ SOC_Pr_Vitis/soc_prj/src/
 
 - Vivado routed timing: WNS `+0.963 ns`, WHS `+0.029 ns`
 - RTL 단위/AXI/통합 Testbench: 총 4,533 checks, 0 fail
-- Python 테스트: 179 passed
+- Python 테스트: 202 passed
 - 보드 로그에서 Timeout, IRQ Pending/W1C, SAFE_MODE latch,
   Manual Recovery 승인/거부 및 최종 NORMAL 복귀 확인
 
