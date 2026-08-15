@@ -153,17 +153,24 @@ Heartbeat 생성을 멈추는 것이고, `TIMEOUTn` 초과 판정은 `heartbeat_
 MicroBlaze 구현은 `SOC_Pr_Vitis/soc_prj/src/uart_proto.c` 다.
 
 - [ ] Baudrate **9600 8N1** 로 고정. Block Design·펌웨어·PC 앱 3곳이 모두 9600
-- [ ] 접두어 4종 확정: `$MISSION` `$EVENT` `$ACK` `$ERR`
+- [ ] 접두어 **5종** 확정: `$MISSION` `$EVENT` `$ACK` `$ERR` **`$IRQ`**
 - [ ] `$MISSION` 필수 9필드 순서 고정
       (`timestamp,state,fault_level,fault_device,fault_code,alive,timeout,output_enable,actuator_enable`)
 - [ ] `$MISSION` 선택 5필드 순서 고정 (`control_valid,state_timer,fault_count0~2`)
+- [ ] `$MISSION` 의 `state_timer` 는 **ms 단위** (펌웨어가 clock count → ms 환산)
+- [ ] `$IRQ` 4필드 순서 고정 (`en_mask,hb_status,fm_status,sc_status`)
 - [ ] 마스크 3종은 하위 3비트만 사용
 - [ ] `$EVENT` 4종 확정: `FAULT_CHANGE` `STATE_CHANGE` `HEARTBEAT_TIMEOUT` `MANUAL_RESET`
 - [ ] `$ERR` 코드 4종 확정: `UNKNOWN_COMMAND` `INVALID_VALUE` `FAULT_ACTIVE` `FAULT_INVALID`
 - [ ] PC → FPGA 명령 이름 확정: `GET,*` `SET,*` `CMD,*` `INJECT,*`
+- [ ] `GET,IRQ` / `SET,IRQ_EN` 포함 (03_MEMBER_C 11.4 / 11.5-1)
+- [ ] `GET,CONFIG` 응답이 `SET,IRQ_EN` 포함 **8줄**
+- [ ] `$ACK,INJECT,*` 에 `ON`/`OFF` 를 되돌려 보내지 않음 (`$ACK,INJECT,ERROR,1` 형태)
+- [ ] `INJECT,CLEAR,ALL` 응답이 `$ACK,INJECT,CLEAR`
 - [ ] 모든 수신 명령이 `$ACK` 또는 `$ERR` 로 응답됨 (무응답 없음)
 - [ ] `$` 로 시작하지 않는 줄은 디버그 문자열로만 취급됨
 - [ ] 줄 종료 `\r\n` 송신 / `\n` `\r\n` 모두 수신 허용
+- [ ] 줄 길이 한계: PC 수신 4096 B / **FPGA 수신 96 B** (초과 시 `$ERR,INVALID_VALUE,LINE_TOO_LONG`)
 - [ ] ISR 안에서 UART 출력 없음
 - [ ] `SET,*` 이 12.2 초기화와 같은 레지스터·같은 0→1 치환 규칙을 씀
 - [ ] `PERSIST_LIMIT` 256 이상이 `$ERR,INVALID_VALUE` 로 거부됨
@@ -277,8 +284,10 @@ mission_soc_dashboard/
 Critical 입력부터 출력 차단까지 `외부 입력 동기화 + Fault Manager 1Clock + Safety Controller 1Clock` 목표를 파형으로 측정한다.
 
 **8·12·15번의 `WARNING` 은 RTL Testbench에서 `eval_tick` 단위로 검증한다.**
-보드 + UART 경로에서는 기본 `PERSIST_LIMIT=5` 기준 Level 1 이 5 ms 밖에 유지되지
-않아 관측되지 않는다 (00 공통명세 10.1). 보드에서 확인하려면 3.1 절차를 쓴다.
+보드 + UART 경로에서도 기본 `PERSIST_LIMIT=5`(Level 1 이 5 ms 유지)에서
+**`$EVENT,STATE_CHANGE,WARNING` 은 정상 기록된다** — ISR Snapshot Ring 이 전이 순간
+값을 잡기 때문이다 (00 공통명세 10.1). 다만 500 ms 주기의 `$MISSION` 으로 갱신되는
+PC 앱 큰 글씨에는 뜨지 않으므로, **판정은 Event Log 로 한다.**
 
 ### 3.1 PC 대시보드 연동 Test
 
@@ -288,7 +297,7 @@ Critical 입력부터 출력 차단까지 `외부 입력 동기화 + Fault Manag
 |---:|---|---|
 | 26 | 앱 `연결` | 상태 `CONNECTED`, 부팅 로그 마지막 줄 `Boot complete` |
 | 27 | `$MISSION` 수신 | 500 ms 주기로 계속 갱신. `마지막 수신` 시간이 증가 |
-| 28 | `GET,CONFIG` | `$ACK,GET,CONFIG` + 설정 7줄이 6장 부팅값과 일치 |
+| 28 | `GET,CONFIG` | `$ACK,GET,CONFIG` + 설정 **8줄**(`SET,IRQ_EN` 포함)이 6장 부팅값과 일치 |
 | 29 | `SET,PERSIST_LIMIT,255` | `$ACK,SET,PERSIST_LIMIT,255`. 256 입력 시 `$ERR,INVALID_VALUE` |
 | 30 | Device 1 `Error` ON | Event Log 에 `STATE_CHANGE,WARNING` → `STATE_CHANGE,DEGRADED` 두 줄이 순서대로 |
 | 31 | Device 1 `Error` OFF | `STATE_CHANGE,NORMAL`, `output_enable` 이 `0b111` 복귀 |
@@ -314,10 +323,16 @@ Critical 입력부터 출력 차단까지 `외부 입력 동기화 + Fault Manag
 
 ## 4. 최종 발표용 최소 시연
 
-**시작 전 필수**: PC 대시보드 연결(9600) 후 `SET,PERSIST_LIMIT,255` 를 먼저 보낸다.
-기본값 5는 `WARNING` 구간이 5 ms 라 3번·6번 항목이 화면에 나타나지 않는다
-(00 공통명세 10.1). 255로 올리면 255 ms 유지되어 Event Log 에 확실히 남는다.
-상태 전이의 증거는 0.5초 주기의 `$MISSION` 이 아니라 **`$EVENT` Event Log** 다.
+**시작 전 필수**: PC 대시보드 연결(**Baudrate 9600 확인**) 후 `SET,PERSIST_LIMIT,255` 를 먼저 보낸다.
+
+이유는 두 가지다.
+① 이 단계 자체가 `SET,*` 8개 명령과 `설정 전체 전송` 기능의 테스트다.
+② 기본값 5는 `WARNING` 구간이 5 ms 라 3번·6번 항목이 **PC 앱 큰 글씨에** 나타나지 않는다.
+255로 올리면 255 ms 유지되어 화면에도 잡힐 확률이 생긴다.
+
+**Event Log 에 남는 것 자체는 기본값 5에서도 정상이다** (00 공통명세 10.1 —
+ISR Snapshot Ring). 상태 전이의 증거는 0.5초 주기의 `$MISSION` 이 아니라
+**`$EVENT` Event Log** 다.
 
 1. 전원 ON → `NORMAL`
 2. Device 0 Heartbeat 중단
@@ -389,6 +404,28 @@ IRQ_STATUS Set
 - [ ] Fault Manager IRQ는 Level/Device/Code 중 하나가 변할 때 Set
 - [ ] Safety Controller IRQ는 System State가 변할 때 Set
 - [ ] W1C 전까지 Custom IP IRQ가 Level High 유지
+
+**xlconcat 연결 순서 = XIntc 인터럽트 ID (8장 변경 금지 대상)**
+
+| xlconcat 포트 | 연결 | XIntc ID | 펌웨어 매크로 |
+|---|---|---:|---|
+| `In0` | `axi_uartlite_0/interrupt` | 0 | `INTR_ID_UART` (이번 빌드 미사용) |
+| `In1` | `fault_manager_ip_0/irq` | 1 | `INTR_ID_FM` |
+| `In2` | `myip_heartbeat_monit_0/irq` | 2 | `INTR_ID_HB` |
+| `In3` | `safety_controller_0/irq` | 3 | `INTR_ID_SC` |
+
+정의 위치: `SOC_Pr_Vitis/soc_prj/src/mission_intr.h`
+
+**W1C 동작 증명 절차** — 평상시 ISR 이 µs 안에 W1C 해 버려 Pending 이 항상 0 이므로
+`$ACK,CMD,CLEAR_IRQ` 만으로는 증거가 되지 않는다. `IRQ_STATUS` 의 Set 은 `IRQ_EN` 과
+무관하다는 점을 이용한다 (`assign irq = reg_irq_status & reg_irq_en;`).
+
+- [ ] `SET,IRQ_EN,0` → 고장 주입 → `GET,IRQ` 로 Pending 래치 확인 (`$IRQ,0x00,0x00,0x01,0x01`)
+- [ ] `CMD,CLEAR_IRQ` → `GET,IRQ` 로 0 확인 (`$IRQ,0x00,0x00,0x00,0x00`)
+- [ ] 앞뒤 `$MISSION` 의 state/level/oe 가 동일 (Pending 만 지웠다는 증거)
+- [ ] **검증 후 `SET,IRQ_EN,0x07` 로 원복** (꺼 둔 동안 ISR 이 안 돌아 짧은 전이를 놓친다)
+
+절차 상세는 `05_BOARD_INTEGRATION_TEST_SCENARIO.md` 15~15-7 단계.
 
 ---
 

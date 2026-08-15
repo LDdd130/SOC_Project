@@ -16,6 +16,7 @@ graphify-out/
 *.jou
 *.str
 *.csv
+*.bak
 
 # Vivado generated outputs
 **/.Xil/
@@ -51,15 +52,13 @@ SOC_Pr_Vitis/**/compile_commands.json
 SOC_Pr_Vitis/fault_manager/
 SOC_Pr_Vitis/fault_manager_ip/
 SOC_Pr_Vitis/soc_prj/src/app.yaml
-*.bak
 
-# Presentation/source captures are not required to rebuild or run the project
-/Mission_SoC_*.pptx
-/Mission_SoC_Canva_Draft_v3.html
-/image*.png
-/verification/**/*.png
-/docs/gen_policy.py
+# Simulation logs and scratch outputs
+tb_logs_batch/
+docs/gen_policy.py
+verification/**/*.png
 
-# Legacy bring-up/reference copies; the active copies live in SOC_Pr/SOC_Pr_Vitis
-/sw/
-/constraints/
+# Remotion 시연 영상 편집 프로젝트 (소스만 추적, 빌드 산출물 제외)
+video/node_modules/
+video/out/
+video/.remotion/

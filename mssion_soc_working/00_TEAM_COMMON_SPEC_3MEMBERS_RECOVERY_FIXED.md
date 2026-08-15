@@ -94,6 +94,7 @@ UART 프로토콜은 03_MEMBER_C 11장에서 확정하며 요약은 다음과 �
 
 ```text
 FPGA → PC : $MISSION (주기 상태)  $EVENT (상태 전이)  $ACK / $ERR (명령 응답)
+            $IRQ (GET,IRQ 응답 — IRQ_EN/IRQ_STATUS 스냅샷)
 PC → FPGA : GET,...  SET,...  CMD,...  INJECT,...
 ```
 
@@ -431,6 +432,17 @@ output wire       control_valid;
 | `0x1C` | `FAULT_COUNT` | R | 구현 시 packing 방식 명시 |
 | `0x20` | `IRQ_EN` | RW | Fault/Level 변화 IRQ Enable |
 | `0x24` | `IRQ_STATUS` | R/W1C | 오류 및 등급 변화 Pending |
+| `0x2C` | `ID` | R | `0x464D4752` (`"FMGR"`). 브링업 진단용 — 아래 참고 |
+
+> **`0x2C` ID 레지스터 (2026-07-30 승인, CHANGE REQUEST 종결)**
+>
+> 원래 확정 맵에 없던 확장이다. Read-only 상수라 Fault 정책·IRQ·상태 어디에도
+> 영향을 주지 않고, 보드 브링업에서 AXI 주소 매핑이 제대로 붙었는지 한 번에
+> 확인하는 용도다. `0x28`은 비워 두어 향후 확장에 남긴다.
+>
+> HW(`fault_manager_axi.v`), FW(`mission_ip_regs.h` 의 `FM_ID`/`FM_ID_VALUE`),
+> 부팅 검사(`main.c` 의 `FM_SelfCheck()`) 모두에 구현되어 있다.
+> 상세는 `02_MEMBER_B_FAULT_MANAGER.md` 6장 참고.
 
 `FAULT_COUNT` packing 권장:
 
@@ -517,15 +529,31 @@ PERSIST_LIMIT=5   ->   5 ms
 PERSIST_LIMIT=255 -> 255 ms
 ```
 
-MicroBlaze가 상태 변화를 감지하는 지연은 9600bps UART 송신 블로킹 때문에
-**50 ms 이상**이다. 따라서 기본값 `PERSIST_LIMIT=5`에서는 Level 1이 이미 Level 2로
-바뀐 뒤에 읽히며 `WARNING`이 UART/PC 어디에도 나타나지 않는다.
-이는 RTL 결함이 아니라 샘플링 한계다.
+> **갱신 (2026-07-30 펌웨어 변경 반영).** 아래 서술은 예전 폴링 방식 펌웨어 기준이었다.
+> 현재는 ISR Snapshot Ring 도입으로 **기본값에서도 상태 전이가 기록된다.**
+
+**기본값 `PERSIST_LIMIT=5`(=5 ms)에서도 상태 전이 자체는 기록된다.**
+하드웨어가 Level 0→1 전이에서도 IRQ를 올리고(`fault_manager_core.v` 의 `out_changed`),
+ISR이 그 순간 값을 Snapshot Ring에 넣기 때문에 유지 시간과 무관하게
+`$EVENT,STATE_CHANGE,WARNING`이 나간다
+(`mission_intr.c` `snap_push()`, `main.c` `drain_snapshots()`).
+
+다만 `$MISSION`은 500 ms 주기 샘플이므로 **PC 대시보드의 큰 글씨 상태 표시에는 뜨지 않는다.**
+짧은 상태의 증거는 `$MISSION`이 아니라 **`$EVENT` Event Log**다.
+
+| 표시 경로 | `PERSIST_LIMIT=5` 에서 WARNING | 이유 |
+|---|:--:|---|
+| `$EVENT,STATE_CHANGE,WARNING` (Event Log) | O | ISR Snapshot이 전이 순간 값을 잡는다 |
+| PC 앱 큰 글씨 (`$MISSION` 기반) | X | 500 ms 주기 샘플 |
+| PC 앱 `최근 전이:` 트레일 | O | `$EVENT` 구동 |
 
 - RTL Testbench에서는 `eval_tick`을 관측하므로 기본값으로도 Level 1이 보인다.
-- 보드 시연에서 `WARNING`을 보여야 하면 `SET,PERSIST_LIMIT,255`로 올린다.
+- 보드 시연에서 `WARNING`을 **큰 글씨에도** 보여야 하면 `SET,PERSIST_LIMIT,255`로 올린다
+  (255 ms → 500 ms 주기 샘플에 걸릴 확률이 생긴다). Event Log만 확인할 목적이면 불필요하다.
 - Level 1은 **단일 비Critical 장치 Fault**에서만 발생한다. Device 2 Fault와
   2개 이상 동시 Fault는 우선순위 1·2에 걸려 설정과 무관하게 곧바로 Level 3이다.
+- Snapshot Ring 깊이는 16이다. 한 Tick 안에 전이가 16회를 넘으면 `$EVENT`가 실제로
+  누락되며 그때는 `warn snapshot ring overflow dropped=N`이 출력된다.
 
 ---
 
@@ -692,11 +720,12 @@ FPGA → PC
   $EVENT,timestamp,event_type[,arg...]
   $ACK,command[,arg...]
   $ERR,error_code[,description]
+  $IRQ,en_mask,hb_status,fm_status,sc_status
 
 PC → FPGA
-  GET,STATUS | GET,CONFIG
+  GET,STATUS | GET,CONFIG | GET,IRQ
   SET,TIMEOUT,<dev>,<clk> | SET,CRITICAL_MASK | SET,PERSIST_LIMIT
-  SET,RECOVERY_COUNT | SET,DEGRADE_MASK
+  SET,RECOVERY_COUNT | SET,DEGRADE_MASK | SET,IRQ_EN
   CMD,MANUAL_RESET | CMD,RESET_FAULT | CMD,CLEAR_IRQ | CMD,CLEAR_HEARTBEAT
   INJECT,ERROR|CRITICAL|TIMEOUT,<dev>,ON|OFF | INJECT,CLEAR,ALL
 ```

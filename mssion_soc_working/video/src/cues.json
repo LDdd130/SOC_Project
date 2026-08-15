@@ -1,0 +1,227 @@
+[
+  {
+    "t": 10.465,
+    "type": "TX",
+    "event": "COMMAND",
+    "desc": "INJECT,TIMEOUT,0,ON",
+    "raw": "INJECT,TIMEOUT,0,ON",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 10.575,
+    "type": "ACK",
+    "event": "INJECT",
+    "desc": "ACK INJECT: TIMEOUT, 0",
+    "raw": "$ACK,INJECT,TIMEOUT,0",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 10.927,
+    "type": "EVENT",
+    "event": "HEARTBEAT_TIMEOUT",
+    "desc": "HEARTBEAT_TIMEOUT (0)",
+    "raw": "$EVENT,3900,HEARTBEAT_TIMEOUT,0",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 10.959,
+    "type": "EVENT",
+    "event": "FAULT_CHANGE",
+    "desc": "FAULT_CHANGE (1, 0, 1)",
+    "raw": "$EVENT,3900,FAULT_CHANGE,1,0,1",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 10.991,
+    "type": "EVENT",
+    "event": "STATE_CHANGE",
+    "desc": "STATE_CHANGE (WARNING)",
+    "raw": "$EVENT,3900,STATE_CHANGE,WARNING",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 11.025,
+    "type": "EVENT",
+    "event": "FAULT_CHANGE",
+    "desc": "FAULT_CHANGE (2, 0, 1)",
+    "raw": "$EVENT,3900,FAULT_CHANGE,2,0,1",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 11.071,
+    "type": "EVENT",
+    "event": "STATE_CHANGE",
+    "desc": "STATE_CHANGE (DEGRADED)",
+    "raw": "$EVENT,3900,STATE_CHANGE,DEGRADED",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 13.265,
+    "type": "TX",
+    "event": "COMMAND",
+    "desc": "INJECT,TIMEOUT,0,OFF",
+    "raw": "INJECT,TIMEOUT,0,OFF",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 13.343,
+    "type": "ACK",
+    "event": "INJECT",
+    "desc": "ACK INJECT: TIMEOUT, 0",
+    "raw": "$ACK,INJECT,TIMEOUT,0",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 13.439,
+    "type": "EVENT",
+    "event": "FAULT_CHANGE",
+    "desc": "FAULT_CHANGE (0, 3, 0)",
+    "raw": "$EVENT,5945,FAULT_CHANGE,0,3,0",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 13.471,
+    "type": "EVENT",
+    "event": "STATE_CHANGE",
+    "desc": "STATE_CHANGE (NORMAL)",
+    "raw": "$EVENT,5945,STATE_CHANGE,NORMAL",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 19.245,
+    "type": "TX",
+    "event": "COMMAND",
+    "desc": "INJECT,CRITICAL,2,ON",
+    "raw": "INJECT,CRITICAL,2,ON",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 19.39,
+    "type": "ACK",
+    "event": "INJECT",
+    "desc": "ACK INJECT: CRITICAL, 2",
+    "raw": "$ACK,INJECT,CRITICAL,2",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 19.486,
+    "type": "EVENT",
+    "event": "FAULT_CHANGE",
+    "desc": "FAULT_CHANGE (3, 2, 3)",
+    "raw": "$EVENT,11355,FAULT_CHANGE,3,2,3",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 19.518,
+    "type": "EVENT",
+    "event": "STATE_CHANGE",
+    "desc": "STATE_CHANGE (SAFE_MODE)",
+    "raw": "$EVENT,11355,STATE_CHANGE,SAFE_MODE",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 26.003,
+    "type": "TX",
+    "event": "COMMAND",
+    "desc": "CMD,MANUAL_RESET",
+    "raw": "CMD,MANUAL_RESET",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 26.158,
+    "type": "ERR",
+    "event": "MANUAL_RESET",
+    "desc": "ERR MANUAL_RESET: FAULT_ACTIVE",
+    "raw": "$ERR,MANUAL_RESET,FAULT_ACTIVE",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 26.189,
+    "type": "EVENT",
+    "event": "MANUAL_RESET",
+    "desc": "MANUAL_RESET (REJECTED)",
+    "raw": "$EVENT,17350,MANUAL_RESET,REJECTED",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 29.499,
+    "type": "TX",
+    "event": "COMMAND",
+    "desc": "INJECT,CLEAR,ALL",
+    "raw": "INJECT,CLEAR,ALL",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 29.613,
+    "type": "ACK",
+    "event": "INJECT",
+    "desc": "ACK INJECT: CLEAR",
+    "raw": "$ACK,INJECT,CLEAR",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 29.677,
+    "type": "EVENT",
+    "event": "FAULT_CHANGE",
+    "desc": "FAULT_CHANGE (0, 3, 0)",
+    "raw": "$EVENT,20450,FAULT_CHANGE,0,3,0",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 35.475,
+    "type": "TX",
+    "event": "COMMAND",
+    "desc": "CMD,MANUAL_RESET",
+    "raw": "CMD,MANUAL_RESET",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 35.533,
+    "type": "ACK",
+    "event": "CMD",
+    "desc": "ACK CMD: MANUAL_RESET",
+    "raw": "$ACK,CMD,MANUAL_RESET",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 35.581,
+    "type": "EVENT",
+    "event": "MANUAL_RESET",
+    "desc": "MANUAL_RESET (ACCEPTED)",
+    "raw": "$EVENT,25750,MANUAL_RESET,ACCEPTED",
+    "state": "",
+    "level": ""
+  },
+  {
+    "t": 35.644,
+    "type": "EVENT",
+    "event": "STATE_CHANGE",
+    "desc": "STATE_CHANGE (NORMAL)",
+    "raw": "$EVENT,25750,STATE_CHANGE,NORMAL",
+    "state": "",
+    "level": ""
+  }
+]

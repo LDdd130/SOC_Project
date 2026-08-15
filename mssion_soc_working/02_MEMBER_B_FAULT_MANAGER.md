@@ -70,7 +70,9 @@ B의 통합 지원 책임:
   먼저 확인해 `$ERR,RESET_FAULT,FAULT_ACTIVE` 를 보내므로 RTL 동작과 응답이
   일치해야 한다.
 - **`PERSIST_LIMIT`은 Level 1(WARNING)의 지속 시간을 그대로 결정한다**
-  (00 공통명세 10.1). 기본값 5는 5 ms 라서 UART/PC에서는 관측되지 않는다.
+  (00 공통명세 10.1). 기본값 5는 5 ms 다. 짧지만 `fault_change_event`(0→1 전이)가
+  IRQ를 올리고 ISR이 그 순간 값을 Snapshot에 남기므로 **`$EVENT` 로는 기본값에서도
+  기록된다.** 500 ms 주기의 `$MISSION` 에만 잡히지 않는다.
   RTL Testbench에서는 `eval_tick` 단위로 Level 1을 반드시 검증한다.
 
 ---

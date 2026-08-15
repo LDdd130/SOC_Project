@@ -1,0 +1,389 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F8FAFD"/>
+      <stop offset="1" stop-color="#F1F4F9"/>
+    </linearGradient>
+    <linearGradient id="boardBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F7F9FC"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#0B1F3A" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#2457C5"/>
+    </marker>
+    <marker id="arrowBlueStart" markerWidth="10" markerHeight="10" refX="2" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M10,0 L0,5 L10,10 Z" fill="#2457C5"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#E44D45"/>
+    </marker>
+    <marker id="arrowTeal" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#159A9C"/>
+    </marker>
+    <style>
+      text {
+        font-family: "Noto Sans CJK KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+        fill: #14213A;
+      }
+      .title { font-size: 38px; font-weight: 800; letter-spacing: -1px; }
+      .subtitle { font-size: 17px; font-weight: 500; fill: #59657A; }
+      .panel-title { font-size: 23px; font-weight: 800; letter-spacing: -0.4px; }
+      .section-title { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; }
+      .node-title { font-size: 18px; font-weight: 800; }
+      .node-sub { font-size: 14px; font-weight: 500; fill: #4C5870; }
+      .tiny { font-size: 12px; font-weight: 500; fill: #5B667B; }
+      .mono { font-family: "DejaVu Sans Mono", "Consolas", monospace; font-size: 12px; fill: #44516A; }
+      .white { fill: #FFFFFF; }
+      .blue { fill: #2457C5; }
+      .teal { fill: #137F83; }
+      .amber { fill: #A75E08; }
+      .red { fill: #B93333; }
+      .green { fill: #217653; }
+      .center { text-anchor: middle; }
+      .right { text-anchor: end; }
+      .line-blue { fill: none; stroke: #2457C5; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+      .line-blue-thin { fill: none; stroke: #2457C5; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .line-red { fill: none; stroke: #E44D45; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+      .line-teal { fill: none; stroke: #159A9C; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+      .line-irq { fill: none; stroke: #4D6FBA; stroke-width: 2.5; stroke-dasharray: 7 6; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+
+  <!-- Header -->
+  <text x="38" y="52" class="title">Mission SoC 전체 시스템 아키텍처</text>
+  <text x="40" y="83" class="subtitle">Python 관제 앱부터 MicroBlaze 펌웨어, FPGA Hardware Safety Path와 LED 출력까지의 실제 구현 구조</text>
+  <g transform="translate(1556,31)">
+    <rect width="326" height="48" rx="24" fill="#E7EEFF" stroke="#AFC4F5"/>
+    <text x="163" y="30" class="section-title blue center">Basys 3 · Vivado/Vitis 2024.2</text>
+  </g>
+
+  <!-- PC Host panel -->
+  <g filter="url(#shadow)">
+    <rect x="34" y="112" width="390" height="895" rx="20" fill="#FFFFFF" stroke="#B8C5DA" stroke-width="2"/>
+  </g>
+  <rect x="34" y="112" width="390" height="58" rx="20" fill="#173E84"/>
+  <rect x="34" y="145" width="390" height="25" fill="#173E84"/>
+  <text x="58" y="143" class="panel-title white">PC HOST · PYTHON APP</text>
+  <text x="394" y="163" class="tiny white right">PySide6 · pyserial · pyqtgraph</text>
+
+  <!-- PC UI -->
+  <g>
+    <rect x="62" y="191" width="334" height="126" rx="13" fill="#EEF4FF" stroke="#5C83D8" stroke-width="2"/>
+    <text x="229" y="220" class="node-title blue center">Presentation / Control UI</text>
+    <line x1="82" y1="233" x2="376" y2="233" stroke="#C2D3F3"/>
+    <text x="85" y="258" class="node-sub">• System State · Device Cards</text>
+    <text x="85" y="281" class="node-sub">• 실시간 Chart · Event Log · CSV Export</text>
+    <text x="85" y="304" class="node-sub">• SET / CMD / INJECT 제어 패널</text>
+  </g>
+
+  <path d="M229 317 L229 338" class="line-blue-thin" marker-end="url(#arrowBlue)"/>
+  <g>
+    <rect x="62" y="340" width="334" height="91" rx="13" fill="#E8F0FF" stroke="#2457C5" stroke-width="2.5"/>
+    <text x="229" y="370" class="node-title blue center">MainWindow</text>
+    <text x="229" y="394" class="node-sub center">Signal orchestration · UI update · policy warning</text>
+    <text x="229" y="416" class="tiny center">FPGA 수신값을 표시하며 임의로 덮어쓰지 않음</text>
+  </g>
+
+  <path d="M145 431 L145 453" class="line-blue-thin" marker-end="url(#arrowBlue)"/>
+  <path d="M313 453 L313 431" class="line-blue-thin" marker-end="url(#arrowBlue)"/>
+  <g>
+    <rect x="62" y="455" width="158" height="87" rx="12" fill="#F5F8FF" stroke="#6B8EDC" stroke-width="2"/>
+    <text x="141" y="484" class="node-title center">CommandBuilder</text>
+    <text x="141" y="507" class="node-sub center">명령 검증·조립</text>
+    <text x="141" y="528" class="tiny center">GET · SET · CMD · INJECT</text>
+  </g>
+  <g>
+    <rect x="238" y="455" width="158" height="87" rx="12" fill="#F5F8FF" stroke="#6B8EDC" stroke-width="2"/>
+    <text x="317" y="484" class="node-title center">ProtocolParser</text>
+    <text x="317" y="507" class="node-sub center">Models 변환</text>
+    <text x="317" y="528" class="tiny center">$MISSION · EVENT · ACK</text>
+  </g>
+
+  <path d="M141 542 L141 565" class="line-blue-thin" marker-end="url(#arrowBlue)"/>
+  <path d="M317 565 L317 542" class="line-blue-thin" marker-end="url(#arrowBlue)"/>
+  <g>
+    <rect x="62" y="568" width="334" height="122" rx="13" fill="#EEF7FF" stroke="#3982B8" stroke-width="2.5"/>
+    <text x="229" y="597" class="node-title center">WorkerThread · Thread-safe TX Queue</text>
+    <g>
+      <rect x="83" y="613" width="139" height="48" rx="10" fill="#DDEEFF" stroke="#3982B8"/>
+      <text x="152" y="635" class="node-sub center">SerialWorker</text>
+      <text x="152" y="653" class="tiny center">실제 COM Port</text>
+    </g>
+    <g>
+      <rect x="238" y="613" width="139" height="48" rx="10" fill="#E8F8F4" stroke="#4AA486"/>
+      <text x="307" y="635" class="node-sub center">MockWorker</text>
+      <text x="307" y="653" class="tiny center">MockDevice</text>
+    </g>
+    <text x="229" y="681" class="tiny center">bytes → line framing → parse_result_ready Signal</text>
+  </g>
+
+  <path d="M145 690 L145 713" class="line-blue-thin" marker-end="url(#arrowBlue)"/>
+  <path d="M313 690 L313 713" class="line-blue-thin" marker-end="url(#arrowBlue)"/>
+  <g>
+    <rect x="62" y="716" width="158" height="103" rx="12" fill="#F8F9FC" stroke="#9AA7BB" stroke-width="2"/>
+    <text x="141" y="747" class="node-title center">LogManager</text>
+    <text x="141" y="772" class="node-sub center">mission_log CSV</text>
+    <text x="141" y="795" class="node-sub center">mission_events Export</text>
+  </g>
+  <g>
+    <rect x="238" y="716" width="158" height="103" rx="12" fill="#F8F9FC" stroke="#9AA7BB" stroke-width="2"/>
+    <text x="317" y="747" class="node-title center">SettingsManager</text>
+    <text x="317" y="772" class="node-sub center">COM · Theme · UI</text>
+    <text x="317" y="795" class="node-sub center">Register Config</text>
+  </g>
+
+  <g>
+    <rect x="62" y="850" width="334" height="116" rx="14" fill="#ECF8F2" stroke="#48A27C" stroke-width="2"/>
+    <text x="82" y="881" class="section-title green">SAFETY BOUNDARY</text>
+    <text x="82" y="906" class="node-sub">GUI는 모니터링·명령·로그만 담당</text>
+    <text x="82" y="930" class="node-sub">고장 판단과 출력 차단은 FPGA RTL이 수행</text>
+    <text x="82" y="953" class="tiny">PC/UART/CPU가 멈춰도 Hardware Safety Path 유지</text>
+  </g>
+
+  <!-- FPGA board panel -->
+  <g filter="url(#shadow)">
+    <rect x="455" y="112" width="1431" height="895" rx="20" fill="url(#boardBg)" stroke="#8FA0B8" stroke-width="2"/>
+  </g>
+  <rect x="455" y="112" width="1431" height="58" rx="20" fill="#0B1F3A"/>
+  <rect x="455" y="145" width="1431" height="25" fill="#0B1F3A"/>
+  <text x="482" y="149" class="panel-title white">FPGA · BASYS 3</text>
+  <text x="1854" y="148" class="tiny white right">xc7a35t · 100 MHz · MicroBlaze RISC-V · 128 KiB Local BRAM</text>
+
+  <!-- Control-plane band -->
+  <rect x="479" y="188" width="1383" height="318" rx="16" fill="#F2F6FF" stroke="#AABFE9" stroke-width="1.8"/>
+  <text x="503" y="217" class="section-title blue">SOFTWARE CONTROL PLANE · VITIS FIRMWARE</text>
+  <g transform="translate(1515,198)">
+    <rect width="320" height="30" rx="15" fill="#DFE9FF"/>
+    <text x="160" y="20" class="tiny blue center">MMIO 설정 · UART 보고 · IRQ Event Capture</text>
+  </g>
+
+  <!-- MicroBlaze and local memory -->
+  <g>
+    <rect x="691" y="236" width="460" height="93" rx="14" fill="#E2ECFF" stroke="#2457C5" stroke-width="2.5"/>
+    <text x="921" y="264" class="node-title blue center">MicroBlaze RISC-V Firmware</text>
+    <text x="718" y="289" class="node-sub">Boot Sequence · HB/FM/SC Register Drivers · UART Protocol</text>
+    <text x="718" y="313" class="node-sub">ISR + Snapshot Ring(16) · Polling Backup · $MISSION 500 ms</text>
+  </g>
+  <path d="M1151 282 L1181 282" class="line-blue-thin" marker-start="url(#arrowBlueStart)" marker-end="url(#arrowBlue)"/>
+  <g>
+    <rect x="1186" y="241" width="137" height="82" rx="12" fill="#FFFFFF" stroke="#6C8BC9" stroke-width="2"/>
+    <text x="1254" y="272" class="node-title center">Local BRAM</text>
+    <text x="1254" y="296" class="node-sub center">I-LMB / D-LMB</text>
+    <text x="1254" y="314" class="tiny center">128 KiB</text>
+  </g>
+  <g>
+    <rect x="1340" y="248" width="132" height="68" rx="11" fill="#FFFFFF" stroke="#8091AB" stroke-width="1.8"/>
+    <text x="1406" y="276" class="node-title center">MDM RISC-V</text>
+    <text x="1406" y="298" class="tiny center">JTAG Debug</text>
+  </g>
+
+  <!-- AXI interconnect -->
+  <path d="M921 329 L921 351" class="line-blue" marker-end="url(#arrowBlue)"/>
+  <rect x="546" y="354" width="1268" height="42" rx="10" fill="#2457C5"/>
+  <text x="1180" y="381" class="section-title white center">M_AXI_DP → AXI4-Lite Interconnect · 7 Memory-Mapped Peripherals</text>
+
+  <!-- AXI peripherals -->
+  <g>
+    <path d="M579 396 L579 416" class="line-blue-thin"/>
+    <rect x="499" y="416" width="160" height="69" rx="10" fill="#FFFFFF" stroke="#5E82D0" stroke-width="2"/>
+    <text x="579" y="441" class="node-title blue center">AXI UARTLite</text>
+    <text x="579" y="461" class="mono center">0x4060_0000</text>
+    <text x="579" y="479" class="tiny center">usb_uart · 9600 8N1</text>
+  </g>
+  <g>
+    <path d="M749 396 L749 416" class="line-blue-thin"/>
+    <rect x="669" y="416" width="160" height="69" rx="10" fill="#FFFFFF" stroke="#5E82D0" stroke-width="2"/>
+    <text x="749" y="441" class="node-title blue center">AXI GPIO0</text>
+    <text x="749" y="461" class="mono center">0x4000_0000</text>
+    <text x="749" y="479" class="tiny center">Error / Critical</text>
+  </g>
+  <g>
+    <path d="M919 396 L919 416" class="line-blue-thin"/>
+    <rect x="839" y="416" width="160" height="69" rx="10" fill="#FFFFFF" stroke="#5E82D0" stroke-width="2"/>
+    <text x="919" y="441" class="node-title blue center">AXI GPIO1</text>
+    <text x="919" y="461" class="mono center">0x4001_0000</text>
+    <text x="919" y="479" class="tiny center">Heartbeat Gen</text>
+  </g>
+  <g>
+    <path d="M1089 396 L1089 416" class="line-blue-thin"/>
+    <rect x="1009" y="416" width="160" height="69" rx="10" fill="#F0FBF9" stroke="#159A9C" stroke-width="2"/>
+    <text x="1089" y="441" class="node-title teal center">Heartbeat AXI</text>
+    <text x="1089" y="461" class="mono center">0x44A1_0000</text>
+    <text x="1089" y="479" class="tiny center">Config / Status / IRQ</text>
+  </g>
+  <g>
+    <path d="M1259 396 L1259 416" class="line-blue-thin"/>
+    <rect x="1179" y="416" width="160" height="69" rx="10" fill="#FFF8EC" stroke="#E5952C" stroke-width="2"/>
+    <text x="1259" y="441" class="node-title amber center">Fault AXI</text>
+    <text x="1259" y="461" class="mono center">0x44A0_0000</text>
+    <text x="1259" y="479" class="tiny center">Config / Status / IRQ</text>
+  </g>
+  <g>
+    <path d="M1429 396 L1429 416" class="line-blue-thin"/>
+    <rect x="1349" y="416" width="160" height="69" rx="10" fill="#FFF1F1" stroke="#E26861" stroke-width="2"/>
+    <text x="1429" y="441" class="node-title red center">Safety AXI</text>
+    <text x="1429" y="461" class="mono center">0x44A2_0000</text>
+    <text x="1429" y="479" class="tiny center">Config / Status / IRQ</text>
+  </g>
+  <g>
+    <path d="M1691 396 L1691 416" class="line-blue-thin"/>
+    <rect x="1594" y="416" width="194" height="69" rx="10" fill="#FFFFFF" stroke="#5E82D0" stroke-width="2"/>
+    <text x="1691" y="441" class="node-title blue center">AXI INTC</text>
+    <text x="1691" y="461" class="mono center">0x4120_0000</text>
+    <text x="1691" y="479" class="tiny center">4 IRQ Inputs</text>
+  </g>
+
+  <!-- PC to UART connection -->
+  <path d="M396 637 L449 637 L449 451 L499 451" class="line-blue"
+        marker-start="url(#arrowBlueStart)" marker-end="url(#arrowBlue)"/>
+  <g transform="translate(408,526)">
+    <rect width="137" height="70" rx="10" fill="#FFFFFF" stroke="#A7B8D2"/>
+    <text x="68" y="22" class="tiny blue center">USB Serial</text>
+    <text x="68" y="42" class="tiny center">TX: GET/SET/CMD/INJECT</text>
+    <text x="68" y="60" class="tiny center">RX: MISSION/EVENT/ACK</text>
+  </g>
+
+  <!-- Hardware safety plane -->
+  <rect x="479" y="526" width="1383" height="385" rx="16" fill="#FFFDFC" stroke="#E0B4A7" stroke-width="1.8"/>
+  <text x="503" y="557" class="section-title red">HARDWARE SAFETY PLANE · DIRECT RTL PATH</text>
+  <g transform="translate(1325,538)">
+    <rect width="510" height="32" rx="16" fill="#FDE9E7"/>
+    <text x="255" y="21" class="tiny red center">GUI · UART · MicroBlaze 상태와 무관하게 Fault 판단 및 출력 차단</text>
+  </g>
+
+  <!-- Injection/input nodes -->
+  <g>
+    <rect x="506" y="606" width="188" height="84" rx="12" fill="#EEF4FF" stroke="#4E79CC" stroke-width="2"/>
+    <text x="600" y="633" class="node-title blue center">GPIO1 · HB GEN</text>
+    <text x="600" y="657" class="node-sub center">heartbeat_async[2:0]</text>
+    <text x="600" y="678" class="tiny center">hb_gen.c · ON/OFF</text>
+  </g>
+  <g>
+    <rect x="506" y="722" width="188" height="96" rx="12" fill="#EEF4FF" stroke="#4E79CC" stroke-width="2"/>
+    <text x="600" y="749" class="node-title blue center">GPIO0 · INJECTION</text>
+    <text x="600" y="774" class="node-sub center">CH1 error_flag[2:0]</text>
+    <text x="600" y="798" class="node-sub center">CH2 critical_fault[2:0]</text>
+  </g>
+
+  <!-- Heartbeat Monitor -->
+  <g>
+    <rect x="763" y="594" width="236" height="183" rx="15" fill="#EBFAF7" stroke="#159A9C" stroke-width="2.8"/>
+    <text x="881" y="625" class="node-title teal center">Heartbeat Monitor IP</text>
+    <line x1="785" y1="638" x2="977" y2="638" stroke="#B5DFD7"/>
+    <rect x="790" y="651" width="182" height="29" rx="7" fill="#FFFFFF" stroke="#8CC9BE"/>
+    <text x="881" y="671" class="node-sub center">3-Channel 2FF Sync</text>
+    <rect x="790" y="688" width="182" height="29" rx="7" fill="#FFFFFF" stroke="#8CC9BE"/>
+    <text x="881" y="708" class="node-sub center">Rising-edge Detect</text>
+    <rect x="790" y="725" width="182" height="34" rx="7" fill="#FFFFFF" stroke="#8CC9BE"/>
+    <text x="881" y="747" class="node-sub center">Counter · Timeout · Alive</text>
+  </g>
+
+  <!-- Fault Manager -->
+  <g>
+    <rect x="1067" y="594" width="236" height="183" rx="15" fill="#FFF7E9" stroke="#E58A16" stroke-width="2.8"/>
+    <text x="1185" y="625" class="node-title amber center">Fault Manager IP</text>
+    <line x1="1089" y1="638" x2="1281" y2="638" stroke="#F0CE99"/>
+    <rect x="1094" y="651" width="182" height="29" rx="7" fill="#FFFFFF" stroke="#EDBE74"/>
+    <text x="1185" y="671" class="node-sub center">Fault Aggregation / Priority</text>
+    <rect x="1094" y="688" width="182" height="29" rx="7" fill="#FFFFFF" stroke="#EDBE74"/>
+    <text x="1185" y="708" class="node-sub center">Persist Counter · Critical Mask</text>
+    <rect x="1094" y="725" width="182" height="34" rx="7" fill="#FFFFFF" stroke="#EDBE74"/>
+    <text x="1185" y="747" class="node-sub center">Level · Device · Code · Valid</text>
+  </g>
+
+  <!-- Safety Controller -->
+  <g>
+    <rect x="1371" y="594" width="236" height="183" rx="15" fill="#FFF0EF" stroke="#E44D45" stroke-width="2.8"/>
+    <text x="1489" y="625" class="node-title red center">Safety Controller IP</text>
+    <line x1="1393" y1="638" x2="1585" y2="638" stroke="#F2B4B0"/>
+    <rect x="1398" y="651" width="182" height="29" rx="7" fill="#FFFFFF" stroke="#E99A95"/>
+    <text x="1489" y="671" class="node-sub center">4-State FSM</text>
+    <rect x="1398" y="688" width="182" height="29" rx="7" fill="#FFFFFF" stroke="#E99A95"/>
+    <text x="1489" y="708" class="node-sub center">Recovery Count · SAFE Latch</text>
+    <rect x="1398" y="725" width="182" height="34" rx="7" fill="#FFFFFF" stroke="#E99A95"/>
+    <text x="1489" y="747" class="node-sub center">Output Gate · Manual Recovery</text>
+  </g>
+
+  <!-- Safety data arrows -->
+  <path d="M694 648 L754 648" class="line-teal" marker-end="url(#arrowTeal)"/>
+  <text x="724" y="636" class="tiny teal center">async HB</text>
+  <path d="M999 665 L1058 665" class="line-red" marker-end="url(#arrowRed)"/>
+  <text x="1028" y="650" class="tiny red center">timeout[2:0]</text>
+  <path d="M694 771 L1029 771 L1029 707 L1058 707" class="line-red" marker-end="url(#arrowRed)"/>
+  <text x="884" y="793" class="tiny red center">error_flag[2:0] · critical_fault[2:0]</text>
+  <path d="M1303 665 L1362 665" class="line-red" marker-end="url(#arrowRed)"/>
+  <text x="1332" y="635" class="tiny red center">fault_level[1:0]</text>
+  <text x="1332" y="650" class="tiny red center">device · code · valid</text>
+
+  <!-- LED concat and output -->
+  <g>
+    <rect x="1625" y="608" width="67" height="151" rx="11" fill="#EDF2FB" stroke="#7189B6" stroke-width="2"/>
+    <text x="1659" y="668" class="node-sub center" transform="rotate(-90 1659 668)">LED CONCAT</text>
+  </g>
+  <path d="M1607 665 L1616 665" class="line-red" marker-end="url(#arrowRed)"/>
+  <path d="M999 747 L1018 747 L1018 797 L1659 797 L1659 768" class="line-teal" marker-end="url(#arrowTeal)"/>
+  <text x="1080" y="824" class="tiny teal center">HB alive / timeout</text>
+  <text x="1328" y="824" class="tiny teal center">FM level / valid</text>
+  <text x="1570" y="824" class="tiny teal center">SC outputs</text>
+  <g>
+    <rect x="1712" y="580" width="124" height="236" rx="14" fill="#0B1F3A" stroke="#2457C5" stroke-width="2"/>
+    <text x="1774" y="610" class="node-title white center">LED[15:0]</text>
+    <line x1="1729" y1="622" x2="1819" y2="622" stroke="#3B5275"/>
+    <text x="1730" y="648" class="tiny white">LD1:0  State</text>
+    <text x="1730" y="671" class="tiny white">LD4:2  Output EN</text>
+    <text x="1730" y="694" class="tiny white">LD5     Actuator</text>
+    <text x="1730" y="717" class="tiny white">LD6     Control</text>
+    <text x="1730" y="740" class="tiny white">LD9:7   Alive</text>
+    <text x="1730" y="763" class="tiny white">LD12:10 Timeout</text>
+    <text x="1730" y="786" class="tiny white">LD14:13 Level</text>
+    <text x="1730" y="807" class="tiny white">LD15    Valid</text>
+  </g>
+  <path d="M1692 684 L1703 684" class="line-red" marker-end="url(#arrowRed)"/>
+
+  <!-- Tick and interrupt planes -->
+  <g>
+    <rect x="762" y="842" width="260" height="50" rx="12" fill="#FFF1F0" stroke="#E44D45" stroke-width="2"/>
+    <text x="892" y="864" class="node-title red center">100 MHz → eval_tick</text>
+    <text x="892" y="883" class="tiny center">1 ms pulse · FM + Safety 동시 평가</text>
+  </g>
+  <path d="M1000 842 L1000 812 L1185 812 L1185 786" class="line-red" marker-end="url(#arrowRed)"/>
+  <path d="M1185 812 L1489 812 L1489 786" class="line-red" marker-end="url(#arrowRed)"/>
+
+  <g>
+    <rect x="1050" y="842" width="557" height="50" rx="12" fill="#EDF3FF" stroke="#5E7FBF" stroke-width="2"/>
+    <text x="1328" y="864" class="node-sub blue center">IRQ: UART In0 · Fault In1 · Heartbeat In2 · Safety In3</text>
+    <text x="1328" y="884" class="tiny center">xlconcat → AXI INTC → ISR W1C → Snapshot Ring → $EVENT</text>
+  </g>
+  <path d="M1691 485 L1691 867 L1616 867" class="line-irq" marker-end="url(#arrowBlue)"/>
+  <path d="M1259 485 L1259 842" class="line-irq"/>
+  <path d="M1089 485 L1089 842" class="line-irq"/>
+  <path d="M1429 485 L1429 842" class="line-irq"/>
+  <path d="M579 485 L579 520 L1830 520 L1830 867 L1607 867" class="line-irq"/>
+
+  <!-- Board footer -->
+  <g>
+    <rect x="479" y="927" width="1383" height="57" rx="12" fill="#EFF2F7" stroke="#CDD5E0"/>
+    <text x="505" y="950" class="section-title">TOP-LEVEL I/O</text>
+    <text x="505" y="973" class="node-sub">sys_clock · reset(btnC) · usb_uart · led[15:0]</text>
+    <text x="1840" y="950" class="section-title right">SAFETY OUTPUT POLICY</text>
+    <text x="1840" y="973" class="node-sub right">NORMAL / WARNING → all ON · DEGRADED → selected OFF · SAFE_MODE → all OFF</text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(38,1033)">
+    <line x1="0" y1="0" x2="52" y2="0" class="line-blue" marker-end="url(#arrowBlue)"/>
+    <text x="64" y="5" class="tiny">AXI / Software Control</text>
+    <line x1="245" y1="0" x2="297" y2="0" class="line-red" marker-end="url(#arrowRed)"/>
+    <text x="309" y="5" class="tiny">Hardware Safety Data</text>
+    <line x1="500" y1="0" x2="552" y2="0" class="line-irq"/>
+    <text x="564" y="5" class="tiny">Interrupt / Event</text>
+    <rect x="741" y="-13" width="240" height="28" rx="14" fill="#ECF8F2" stroke="#7DB99F"/>
+    <text x="861" y="6" class="tiny green center">Safety authority = FPGA RTL only</text>
+  </g>
+  <text x="1882" y="1039" class="tiny right">Source of truth: mission_soc.bd · xparameters.h · soc_prj/src · mission_dashboard</text>
+</svg>

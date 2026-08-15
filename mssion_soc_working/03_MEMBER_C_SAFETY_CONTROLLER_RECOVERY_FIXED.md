@@ -354,18 +354,30 @@ heartbeat_monitor_ip.alive
 
 ---
 
-## 10. 권장 Interrupt 순서
+## 10. Interrupt 연결 순서 — **확정 (BD 실측)**
 
-xlconcat 입력 예:
+> **갱신 (2026-07-30).** 아래는 통합 이전의 "권장 예시" 였다.
+>
+> ```text
+> (구) In0 = heartbeat  In1 = fault_manager  In2 = safety_controller  In3 = UARTLite/Timer
+> ```
+>
+> 실제 `mission_soc.bd` 는 다른 순서로 배선되었고, `04` 체크리스트 8장이
+> **IRQ 연결 순서를 변경 금지 항목**으로 지정했으므로 이 문서를 실제 값으로 맞춘다.
 
-```text
-In0 = heartbeat_monitor_irq
-In1 = fault_manager_irq
-In2 = safety_controller_irq
-In3 = AXI UARTLite IRQ 또는 Timer IRQ
-```
+`mission_soc.bd` 의 `microblaze_riscv_0_xlconcat` 실제 배선:
 
-실제 Vector ID는 Vivado 생성 후 `xparameters.h` 기준으로 확정한다.  
+| xlconcat 포트 | 연결 | XIntc ID | 펌웨어 매크로 |
+|---|---|---:|---|
+| `In0` | `axi_uartlite_0/interrupt` | 0 | `INTR_ID_UART` (이번 빌드 미사용) |
+| `In1` | `fault_manager_ip_0/irq` | **1** | `INTR_ID_FM` |
+| `In2` | `myip_heartbeat_monit_0/irq` | **2** | `INTR_ID_HB` |
+| `In3` | `safety_controller_0/irq` | **3** | `INTR_ID_SC` |
+
+ID 정의는 `SOC_Pr_Vitis/soc_prj/src/mission_intr.h` 에 있다.
+**xlconcat 배선 순서를 바꾸면 ID가 통째로 밀리므로 변경 금지다** (04 체크리스트 8장).
+
+Vector ID를 새로 확인해야 하면 `xparameters.h` 를 기준으로 한다.
 AI가 임의의 숫자 ID를 고정해서 코드에 넣지 않게 한다.
 
 ISR 원칙:
@@ -417,8 +429,9 @@ MicroBlaze 측 구현은 `SOC_Pr_Vitis/soc_prj/src/uart_proto.c` 다.
 | 인코딩 | ASCII (UTF-8 호환) |
 | 구분자 | 쉼표 `,` |
 | 줄 종료 | `\n`. 보드는 `\r\n` 을 보내고 PC 는 둘 다 허용한다 |
-| 최대 줄 길이 | 4096 bytes. 초과분은 PC 가 폐기한다 |
-| 접두어 | `$MISSION`, `$EVENT`, `$ACK`, `$ERR` |
+| 최대 줄 길이 (PC 수신) | **4096 bytes.** 초과분은 PC 가 폐기한다 (`constants.py` `MAX_LINE_BYTES`) |
+| 최대 줄 길이 (FPGA 수신) | **96 bytes.** 초과하면 그 줄을 버리고 `$ERR,INVALID_VALUE,LINE_TOO_LONG` 응답 (`uart_proto.c` `RX_LINE_MAX`) |
+| 접두어 | `$MISSION`, `$EVENT`, `$ACK`, `$ERR`, `$IRQ` (**5종**) |
 | 그 외 | `$` 로 시작하지 않는 줄은 디버그 문자열. PC 는 Raw Log 에만 기록한다 |
 
 9600bps 는 한 글자에 약 1.04 ms 다. `$MISSION` 한 줄이 70자를 넘으므로 전송에만
@@ -452,7 +465,7 @@ $MISSION,1250,SAFE_MODE,3,2,3,0x03,0x04,0x00,0,0,3245,0,0,1
 | 8 | `output_enable` | 3비트 마스크 | 동일 |
 | 9 | `actuator_enable` | 0 / 1 | |
 | 10 | `control_valid` | 0 / 1 | **선택** |
-| 11 | `state_timer` | 정수 | **선택**. `STATE_TIMER` (Offset `0x14`) |
+| 11 | `state_timer` | 정수 | **선택. 단위는 ms.** `STATE_TIMER`(Offset `0x14`)는 100MHz clock count 이며 MicroBlaze 가 ms 로 환산해 내보낸다 (`sc_regs.c` 의 `CLK_TO_MS`) |
 | 12~14 | `fault_count0~2` | 0~255 | **선택**. `FAULT_COUNT` 언패킹 값 |
 
 - **1~9 번은 필수.** 10 번 이후는 없어도 PC 가 파싱한다.
@@ -532,6 +545,7 @@ SET,CRITICAL_MASK,<mask>           mask: 0x00~0x07
 SET,PERSIST_LIMIT,<value>          value: 0~255
 SET,RECOVERY_COUNT,<value>         value: 0~65535
 SET,DEGRADE_MASK,<mask>            mask: 0x00~0x07
+SET,IRQ_EN,<mask>                  mask: 0x00~0x07 (bit0=A, bit1=B, bit2=C)
 ```
 
 | 명령 | IP | Offset (00 공통명세 9장) |
@@ -541,11 +555,17 @@ SET,DEGRADE_MASK,<mask>            mask: 0x00~0x07
 | `SET,PERSIST_LIMIT` | fault_manager | `0x0C` |
 | `SET,RECOVERY_COUNT` | safety_controller | `0x10` |
 | `SET,DEGRADE_MASK` | safety_controller | `0x0C` |
+| `SET,IRQ_EN` bit0 | heartbeat_monitor | `0x20` |
+| `SET,IRQ_EN` bit1 | fault_manager | `0x20` |
+| `SET,IRQ_EN` bit2 | safety_controller | `0x18` |
 
 - `TIMEOUTn=0`, `PERSIST_LIMIT=0`, `RECOVERY_COUNT=0` 은 유효값 **1** 로 간주 (00 공통명세 12.1)
 - `PERSIST_LIMIT` 레지스터는 8비트다. **256 이상은 `$ERR,INVALID_VALUE`** 로 거부한다.
 - `DEGRADED → WARNING` 경로를 쓰려면 `RECOVERY_COUNT < PERSIST_LIMIT` (6장).
   PC 는 위반 시 경고만 표시하고 전송은 막지 않는다.
+- `SET,IRQ_EN` 은 기본 `0x07`(전부 켬)이다. 각 IP 의 `IRQ_EN` 폭이 달라서
+  (A 는 3비트, B/C 는 1비트) 펌웨어가 0/1 로 정규화해 묶는다.
+  **검증 목적으로만 끄고 반드시 되돌린다** — 자세한 이유는 11.5-1 참고.
 
 ---
 
@@ -554,9 +574,10 @@ SET,DEGRADE_MASK,<mask>            mask: 0x00~0x07
 | 명령 | 응답 |
 |---|---|
 | `GET,STATUS` | `$ACK,GET,STATUS` + `$MISSION,...` 한 줄 |
-| `GET,CONFIG` | `$ACK,GET,CONFIG` + 현재 설정값을 `SET,...` 형태 `$ACK` 로 나열 |
+| `GET,CONFIG` | `$ACK,GET,CONFIG` + 현재 설정값을 `SET,...` 형태 `$ACK` 로 **8줄** 나열 |
+| `GET,IRQ` | `$ACK,GET,IRQ` + `$IRQ,...` 한 줄 (11.5-1) |
 
-`GET,CONFIG` 응답 예:
+`GET,CONFIG` 응답 예 — **`$ACK,GET,CONFIG` 뒤에 정확히 8줄이다**:
 
 ```text
 $ACK,GET,CONFIG
@@ -567,7 +588,47 @@ $ACK,SET,CRITICAL_MASK,4
 $ACK,SET,PERSIST_LIMIT,5
 $ACK,SET,RECOVERY_COUNT,2
 $ACK,SET,DEGRADE_MASK,1
+$ACK,SET,IRQ_EN,7
 ```
+
+---
+
+### 11.5-1 `$IRQ` — IRQ_EN / IRQ_STATUS 스냅샷 (FPGA → PC)
+
+`GET,IRQ` 에 대한 응답이다. `$ACK,GET,IRQ` 다음 줄에 나온다.
+
+```text
+$IRQ,<en_mask>,<hb_status>,<fm_status>,<sc_status>
+```
+
+| 필드 | 뜻 | 폭 |
+|---|---|---|
+| `en_mask` | `IRQ_EN` 묶음. bit0=A(heartbeat), bit1=B(fault), bit2=C(safety) | 3비트 |
+| `hb_status` | heartbeat_monitor `IRQ_STATUS` (Device 별 Timeout Pending) | 3비트 |
+| `fm_status` | fault_manager `IRQ_STATUS` (Fault Change Pending) | 1비트 |
+| `sc_status` | safety_controller `IRQ_STATUS` (State Change Pending) | 1비트 |
+
+```text
+$IRQ,0x07,0x00,0x00,0x00     평상시. ISR 이 즉시 W1C 해서 Pending 은 항상 0
+$IRQ,0x00,0x00,0x01,0x01     IRQ_EN 을 끈 상태. B/C Pending 이 래치돼 있다
+```
+
+**평상시 status 는 항상 0 이다.** ISR 이 인터럽트 진입 즉시 W1C 하기 때문이다.
+따라서 `$ACK,CMD,CLEAR_IRQ` 만으로는 W1C 가 동작한다는 증거가 되지 않는다.
+0 이 아닌 값을 보려면 `SET,IRQ_EN,0` 으로 irq 핀을 막아 ISR 을 멈춰야 한다.
+`IRQ_STATUS` 의 Set 은 `IRQ_EN` 과 무관하므로 Pending 이 그대로 쌓인다.
+
+```verilog
+if (fault_change_event) reg_irq_status <= 1'b1;   // SET 은 irq_en 과 무관
+assign irq = reg_irq_status & reg_irq_en;         // 핀만 irq_en 이 막는다
+```
+
+이것이 04 체크리스트 5.2 의 W1C 경로를 실제로 검증하는 **유일한 수단**이다
+(절차는 `05_BOARD_INTEGRATION_TEST_SCENARIO.md` 15~15-7 단계).
+
+> **검증이 끝나면 `SET,IRQ_EN,0x07` 로 반드시 되돌린다.** 꺼 둔 동안은 ISR 이 돌지 않아
+> 상태 Snapshot 이 쌓이지 않고, 짧게 스쳐 가는 전이(WARNING 등)를 놓친다.
+> 메인 루프 폴링 백스톱은 살아 있어 상태 전이 자체는 계속 `$EVENT` 로 나간다.
 
 ---
 
@@ -614,6 +675,15 @@ MicroBlaze 가 AXI GPIO 로 구동해서 만든다. 00 공통명세 12.3 의 보
 `INJECT,TIMEOUT` 은 하드웨어가 실제로 Counter 를 세야 하므로 즉시 반응하지 않는다.
 Device 0 = 300 ms, Device 1 = 600 ms, Device 2 = 150 ms 뒤에 반응한다.
 
+**응답 형식 (펌웨어 확정)** — `ON`/`OFF` 인자는 `$ACK` 에 되돌려 보내지 않는다.
+
+```text
+INJECT,ERROR,1,ON      ->  $ACK,INJECT,ERROR,1
+INJECT,CRITICAL,2,OFF  ->  $ACK,INJECT,CRITICAL,2
+INJECT,TIMEOUT,0,ON    ->  $ACK,INJECT,TIMEOUT,0
+INJECT,CLEAR,ALL       ->  $ACK,INJECT,CLEAR
+```
+
 ---
 
 ### 11.8 WARNING 관측 조건 (중요)
@@ -625,7 +695,11 @@ Level 1 지속시간 = PERSIST_LIMIT × eval_tick 주기(1 ms)
 기본 PERSIST_LIMIT=5  →  5 ms
 ```
 
-MicroBlaze 가 상태 변화를 감지하는 지연은 9600bps 기준 다음과 같다.
+> **갱신 (2026-07-30 펌웨어 변경 반영).** 아래 서술은 폴링 방식 펌웨어 기준이었다.
+> 현재는 ISR Snapshot Ring 이 들어가 **기본값에서도 `$EVENT` 로는 기록된다.**
+
+**(구) 폴링 방식의 문제** — 메인 루프가 `TICK_MS`(5 ms)마다 레지스터를 읽어 직전 값과
+비교했다. 여기에 9600bps 송신 블로킹이 겹쳐 실제 감지 지연이 누적 50 ms 이상이었다.
 
 ```text
 INJECT 파싱 -> Level 1 성립          : 수 클럭
@@ -634,12 +708,28 @@ irq 로그 1줄 (약 29자)               : 약 30 ms  (블로킹)
 report_changes() 가 레지스터를 읽음  : 누적 50 ms 이상
 ```
 
-즉 **기본 설정에서는 Level 1 이 이미 Level 2 로 바뀐 뒤에 읽히므로
-`$EVENT,STATE_CHANGE,WARNING` 이 아예 나오지 않는다.** 이는 정상 동작이다.
+그래서 5 ms 짜리 Level 1 이 통째로 사라졌다 (`mission_events_20260731_094029.csv`,
+`100054.csv` 에 `STATE_CHANGE,WARNING` 0건, `FAULT_CHANGE` 가 level 0 → 2 로 건너뜀).
 
-WARNING 을 시연하려면 다음을 지킨다.
+**(현재) ISR Snapshot Ring** — 하드웨어는 0→1 전이에서도 IRQ 를 올리고 있었다
+(`fault_manager_core.v` 의 `out_changed`). ISR 이 그 순간 값을 깊이 16 Ring 에 넣고
+메인 루프가 순서대로 꺼내 `$EVENT` 를 만든다 (`mission_intr.c` `snap_push()`,
+`main.c` `drain_snapshots()`). 따라서 **유지 시간과 무관하게 전부 보고된다.**
+폴링(`report_changes()`)은 백스톱으로만 남았다.
 
-1. `SET,PERSIST_LIMIT,255` 로 올린다 → Level 1 창이 255 ms 가 되어 확실히 잡힌다.
+| 표시 경로 | `PERSIST_LIMIT=5`(5 ms) 에서 WARNING | 이유 |
+|---|:--:|---|
+| `$EVENT,STATE_CHANGE,WARNING` (Event Log) | **O** | ISR Snapshot |
+| PC 앱 큰 글씨 (`$MISSION` 500 ms 주기) | X | 주기 샘플이라 못 잡는다 |
+| PC 앱 `최근 전이:` 트레일 | **O** | `$EVENT` 구동 |
+
+실측 근거: `mission_events_20260731_104026.csv` 에 기본값 5 로 돌린 상태에서
+`FAULT_CHANGE,1,1,2` + `STATE_CHANGE,WARNING` 이 남아 있다.
+
+WARNING 을 **큰 글씨에도** 보이게 하려면 다음을 지킨다.
+
+1. `SET,PERSIST_LIMIT,255` 로 올린다 → Level 1 창이 255 ms 가 되어 잡힐 확률이 생긴다.
+   Event Log 확인만 할 목적이면 이 단계는 필요 없다.
 2. **단일 비Critical 장치** 하나만 주입한다. 아래는 설정과 무관하게 WARNING 이 없다.
 
 | 조작 | WARNING 발생 | 이유 |
@@ -649,6 +739,8 @@ WARNING 을 시연하려면 다음을 지킨다.
 | 2개 이상 장치 동시 Fault | X | `FAULT_MULTI_DEVICE` → 즉시 Level 3 (우선순위 2) |
 
 3. 확인은 `$MISSION` (500 ms 주기) 이 아니라 **`$EVENT,STATE_CHANGE,WARNING`** 으로 한다.
+4. `SET,IRQ_EN` 으로 IRQ 를 꺼 둔 상태에서는 ISR 이 돌지 않아 Snapshot 이 쌓이지 않는다.
+   WARNING 을 관측하려면 `IRQ_EN=0x07` 이어야 한다 (11.5-1).
 
 ---
 
@@ -667,6 +759,12 @@ WARNING 을 시연하려면 다음을 지킨다.
 □ TIMEOUTn=0, PERSIST_LIMIT=0, RECOVERY_COUNT=0 을 1 로 처리하는가
 □ PERSIST_LIMIT 256 이상을 $ERR,INVALID_VALUE 로 거부하는가
 □ 긴 UART 송신 중에도 Heartbeat 생성이 끊기지 않는가
+□ GET,IRQ 에 $IRQ 4필드로 응답하는가 (11.5-1)
+□ SET,IRQ_EN 이 세 IP 의 IRQ_EN 을 bit0/1/2 로 나눠 적용하는가
+□ GET,CONFIG 가 SET,IRQ_EN 을 포함해 8줄을 보내는가
+□ 96바이트 초과 줄을 $ERR,INVALID_VALUE,LINE_TOO_LONG 으로 거부하는가
+□ 상태 전이를 ISR Snapshot 으로 잡는가 (짧은 WARNING 유실 방지, 11.8)
+□ $ACK,INJECT,* 에 ON/OFF 를 되돌려 보내지 않는가 (11.7)
 ```
 
 ---
@@ -749,9 +847,20 @@ BTN_D는 Timeout/Fault 상태 자체를 직접 Clear하지 않는다.
 > FND:      Fault Level 또는 Fault Device
 > ```
 
-핀 배치는 프로젝트에 등록된 `Basys-3-Master.xdc` 를 따른다
-(저장소 루트의 `constraints/mission_soc.xdc` 는 프로젝트에 포함되지 않은
-참고용 사본이다).
+핀 배치는 프로젝트에 등록된 **유일한 제약 파일**을 따른다.
+
+```text
+SOC_Pr/soc_project/soc_project.srcs/constrs_1/imports/digilent-xdc-master/Basys-3-Master.xdc
+```
+
+활성 배선은 `sys_clock`(W5), `reset`(U18=btnC), `usb_uart_rxd/txd`(B18/A18),
+`led[0..15]` 뿐이며 나머지 줄은 전부 주석 처리되어 있다.
+
+> **`create_clock` 줄을 되살리지 말 것.** 11행의
+> `#create_clock -add -name sys_clk_pin ...` 은 의도적으로 주석 처리한 것이다.
+> BD 의 Clocking Wizard 가 이미 `sys_clock` 에 클럭 제약을 자동 생성하므로,
+> `-add` 로 하나 더 얹으면 같은 포트에 클럭이 2개가 되어 `TIMING-6` Critical Warning 2건과
+> `multiple_clock` 2,730건이 부활한다 (`docs/mission_soc_impl_methodology.md` 3.1).
 
 ---
 
