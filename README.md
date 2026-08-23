@@ -13,14 +13,11 @@
   <img src="https://img.shields.io/badge/Timing-WNS%20%2B0.963ns-2E8B57?style=flat-square" alt="WNS">
 </p>
 
-<!-- TODO: asset/ 폴더에 보드 사진과 GUI 캡처를 추가한 뒤 주석을 해제하세요. -->
 <p>
   <img src="./mssion_soc_working/asset/image.png" width="45%" alt="Basys 3 Board">
-  &nbsp;&nbsp;
-  <!-- <img src="./mssion_soc_working/asset/dashboard.png" width="45%" alt="Mission SoC Dashboard"> -->
 </p>
 
-**세 개의 Custom IP가 FPGA 내부에서 직접 연결되어 고장을 감지·등급화·차단하고, MicroBlaze는 설정과 보고만 담당하며, PC 대시보드는 안전 판단에 전혀 관여하지 않는 임무컴퓨터형 안전 SoC입니다.**
+세 개의 Custom IP가 FPGA 내부에서 직접 연결되어 고장을 감지·등급화·차단하고, MicroBlaze는 설정과 보고만 담당하며, PC 대시보드는 안전 판단에 관여하지 않는 임무컴퓨터형 안전 SoC입니다.
 
 ### 🎥 시연 영상
 
@@ -33,18 +30,18 @@ https://github.com/user-attachments/assets/309fbf5f-ca7d-4d27-9868-a485077f600c
 
 ## 1. Project Overview
 
-이 프로젝트의 핵심 설계 원칙은 **"안전 판단 경로에 소프트웨어를 두지 않는다"** 입니다.
+안전 판단 경로에 소프트웨어를 두지 않는 것을 전제로 설계했습니다.
 
-일반적인 SoC 실습은 CPU가 센서를 폴링하고 판단해 출력을 끊습니다. 그러면 펌웨어가 죽거나 UART가 끊기는 순간 안전 기능도 함께 죽습니다. 그래서 `heartbeat_monitor → fault_manager → safety_controller` 세 Custom IP를 **AXI를 거치지 않고 RTL 신호로 직접 연결**했습니다. MicroBlaze는 부팅 시 설정을 쓰고, IRQ를 받아 상태를 UART로 보고할 뿐이며, **MicroBlaze가 정지해도 고장 판정과 SAFE_MODE 전환은 계속 동작합니다.**
+일반적인 SoC 실습 구성은 CPU가 센서를 폴링하고 판단해 출력을 끊습니다. 이 구조는 펌웨어가 멈추거나 UART가 끊기면 안전 기능도 같이 멈춥니다. 그래서 `heartbeat_monitor → fault_manager → safety_controller` 세 Custom IP를 AXI를 거치지 않고 RTL 신호로 직접 연결했습니다. MicroBlaze는 부팅 시 설정을 쓰고 IRQ를 받아 상태를 UART로 보고하는 역할만 하며, MicroBlaze가 정지해도 고장 판정과 SAFE_MODE 전환은 그대로 동작합니다.
 
-Fault 등급화는 두 개의 시간 축을 씁니다. Critical 조건과 다중 장치 고장은 **매 클럭 즉시** 판정하고, "얼마나 오래 지속되었는가"는 공통 `eval_tick`(1 ms) 에서만 셉니다. `fault_manager`의 지속 Count와 `safety_controller`의 복구 Count가 같은 tick을 공유하므로, `RECOVERY_COUNT < PERSIST_LIMIT` 같은 정책 관계가 두 IP 사이에서 성립합니다.
+Fault 등급화는 두 개의 시간 축을 씁니다. Critical 조건과 다중 장치 고장은 매 클럭 즉시 판정하고, 지속 시간은 공통 `eval_tick`(1 ms)에서만 셉니다. `fault_manager`의 지속 Count와 `safety_controller`의 복구 Count가 같은 tick을 공유하므로, `RECOVERY_COUNT < PERSIST_LIMIT` 같은 정책 관계가 두 IP 사이에서 성립합니다.
 
-PC 대시보드(PySide6)는 **양방향 제어 단말이지만 안전 판단은 하지 않습니다.** 수신값을 그대로 표시하고, 정책과 어긋나면 `POLICY WARNING` 로그만 남길 뿐 값을 덮어쓰지 않습니다. `Manual Recovery` 성공 여부도 앱이 가정하지 않고 FPGA의 `$ACK` 또는 새 `$MISSION` 으로만 확인합니다.
+PC 대시보드(PySide6)는 양방향 제어 단말이지만 안전 판단은 하지 않습니다. 수신값을 그대로 표시하고, 정책과 어긋나면 `POLICY WARNING` 로그만 남길 뿐 값을 덮어쓰지 않습니다. `Manual Recovery` 성공 여부도 앱이 가정하지 않고 FPGA의 `$ACK` 또는 새 `$MISSION` 으로만 확인합니다.
 
 | 항목 | 내용 |
 |---|---|
-| 프로젝트 형태 | 팀 프로젝트 (3인) <!-- TODO: 본인이 담당한 IP/영역을 확정해 주세요. 저장소 구성상 fault_manager_ip(팀원 B) + 통합 펌웨어 + 대시보드로 보입니다 --> |
-| 담당 범위 | <!-- TODO: 예) fault_manager_ip RTL·AXI·검증 / MicroBlaze 통합 펌웨어 / PC 대시보드 --> |
+| 프로젝트 형태 | 팀 프로젝트 (3인) |
+| 담당 범위 | **[작성 필요 — 예: `fault_manager_ip` RTL·AXI·검증 / MicroBlaze 통합 펌웨어 / PC 대시보드]** |
 | 대상 보드 | Digilent Basys 3 (Xilinx Artix-7, `xc7a35tcpg236-1`) |
 | System Clock | 100 MHz (Block Design의 Clock Wizard) |
 | HDL / Language | Verilog, C (MicroBlaze), Python 3.11+ (대시보드) |
@@ -80,34 +77,34 @@ PC 대시보드(PySide6)는 **양방향 제어 단말이지만 안전 판단은 
 ## 3. System Architecture
 
 ```text
-                        ┌──────────── FPGA (Basys 3) ─────────────────────────────┐
-                        │                                                          │
- axi_gpio_1 CH1 ───────►│ heartbeat_async[2:0]                                     │
- (MicroBlaze가 생성)     │        ▼                                                  │
-                        │  ┌──────────────────────┐                                │
-                        │  │ heartbeat_monitor_ip │ (A)                            │
+                        ┌──────────── FPGA (Basys 3) ───────────────────────────────┐
+                        │                                                           │
+ axi_gpio_1 CH1 ───────►│ heartbeat_async[2:0]                                      │
+ (MicroBlaze가 생성)    │        ▼                                                  │
+                        │  ┌───────────────────────┐                                │
+                        │  │ heartbeat_monitor_ip  │ (A)                            │
                         │  │  2FF 동기화 + Edge    │                                │
                         │  │  장치별 경과 Counter  │                                │
                         │  │  Timeout / Alive 판정 │                                │
-                        │  └───────┬──────────────┘                                │
+                        │  └───────┬───────────────┘                                │
                         │          │ timeout[2:0]        alive[2:0] ──► LED         │
  axi_gpio_0 CH1 ───────►│ error_flag[2:0]                                           │
  axi_gpio_0 CH2 ───────►│ critical_fault[2:0]                                       │
                         │          ▼                                                │
-                        │  ┌──────────────────────┐        ┌────────────────────┐  │
-                        │  │  fault_manager_ip    │ (B) ◄──┤ eval_tick_generator│  │
-                        │  │  중요도 · 지속 횟수   │        │ 100,000 clk = 1 ms │  │
-                        │  │  Fault Level 결정     │        └─────────┬──────────┘  │
-                        │  └───────┬──────────────┘                  │             │
-                        │          │ fault_level[1:0]                │             │
-                        │          │ fault_device[1:0]               │             │
-                        │          │ fault_code[7:0]                 │             │
-                        │          │ fault_valid                     │             │
-                        │          ▼                                 ▼             │
-                        │  ┌───────────────────────────────────────────┐           │
-                        │  │        safety_controller_ip (C)           │           │
-                        │  │  상태 FSM · SAFE_MODE Latch · 출력 제어    │           │
-                        │  └───────┬───────────────────────────────────┘           │
+                        │  ┌──────────────────────┐         ┌────────────────────┐  │
+                        │  │  fault_manager_ip    │ (B) ◄───┤ eval_tick_generator│  │
+                        │  │  중요도 · 지속 횟수  │         │ 100,000 clk = 1 ms │  │
+                        │  │  Fault Level 결정    │         └────────┬───────────┘  │
+                        │  └───────┬──────────────┘                  │              │
+                        │          │ fault_level[1:0]                │              │
+                        │          │ fault_device[1:0]               │              │
+                        │          │ fault_code[7:0]                 │              │
+                        │          │ fault_valid                     │              │
+                        │          ▼                                 ▼              │
+                        │  ┌───────────────────────────────────────────┐            │
+                        │  │        safety_controller_ip (C)           │            │
+                        │  │  상태 FSM · SAFE_MODE Latch · 출력 제어   │            │
+                        │  └───────┬───────────────────────────────────┘            │
                         │          │ system_state[1:0] / output_enable[2:0]         │
                         │          │ actuator_enable / control_valid                │
                         │          ▼                                                │
@@ -119,17 +116,17 @@ PC 대시보드(PySide6)는 **양방향 제어 단말이지만 안전 판단은 
                                                   ▼            ▼
                                           ┌──────────────────────────┐
                                           │ MicroBlaze RISC-V        │
-                                          │  설정 · IRQ 수집 · 보고   │
+                                          │  설정 · IRQ 수집 · 보고  │
                                           └───────────┬──────────────┘
                                                       │ AXI UARTLite 9600 8N1
                                                       ▼
                                           ┌──────────────────────────┐
                                           │ PC Dashboard (PySide6)   │
-                                          │  모니터링 · 명령 · CSV    │
+                                          │  모니터링 · 명령 · CSV   │
                                           └──────────────────────────┘
 ```
 
-`alive`는 Fault Manager 입력이 **아닙니다.** Fault Manager에는 `timeout`만 직접 연결하고, `alive`는 LED와 상태 표시용으로만 씁니다.
+`alive`는 Fault Manager 입력이 아닙니다. Fault Manager에는 `timeout`만 직접 연결하고, `alive`는 LED와 상태 표시용으로만 씁니다.
 
 ### 3.1 Address Map
 
@@ -201,13 +198,13 @@ end
 | `0x20` | `IRQ_EN` | RW | bit[2:0] |
 | `0x24` | `IRQ_STATUS` | R/W1C | bit[2:0] 장치별 Timeout Pending |
 
-`LAST_COUNTn`은 하드웨어가 세므로 **소프트웨어가 UART 송신으로 수백 ms 멈춰 있어도 정확합니다.** 펌웨어의 Heartbeat 생성기(`hb_gen.c`)가 이 값을 시간 기준으로 삼는 이유입니다.
+`LAST_COUNTn`은 하드웨어가 세므로 소프트웨어가 UART 송신으로 수백 ms 멈춰 있어도 정확합니다. 펌웨어의 Heartbeat 생성기(`hb_gen.c`)가 이 값을 시간 기준으로 삼는 이유입니다.
 
 ---
 
 ## 5. Fault Manager (IP B)
 
-오류를 **감지**하는 IP가 아니라, 들어온 오류를 중요도와 지속 횟수로 **등급화**하는 IP입니다.
+오류를 감지하는 IP가 아니라, 들어온 오류를 중요도와 지속 횟수로 등급화하는 IP입니다.
 
 ### 5.1 우선순위 (높은 것이 낮은 것을 덮어씀)
 
@@ -250,7 +247,7 @@ wire [2:0] persist_hit = {
 };
 ```
 
-`RESET_FAULT`(W1P)는 **현재 `device_fault`가 하나도 없을 때만** 적용됩니다. 활성 Fault가 남아 있는데 Count만 지워 Level 2를 Level 1로 낮추는 동작은 금지되어 있고, 이 조건은 RTL에서 강제합니다.
+`RESET_FAULT`(W1P)는 현재 `device_fault`가 하나도 없을 때만 적용됩니다. 활성 Fault가 남아 있는데 Count만 지워 Level 2를 Level 1로 낮추는 동작은 금지되어 있고, 이 조건은 RTL에서 강제합니다.
 
 ### 5.3 레지스터 맵 (`0x44A00000`)
 
@@ -265,7 +262,7 @@ wire [2:0] persist_hit = {
 | `0x20` / `0x24` | `IRQ_EN` / `IRQ_STATUS` | RW / R/W1C | bit0 Fault Change |
 | `0x2C` | `ID` | R | `0x464D4752` (`"FMGR"`) — AXI 매핑 자체 검증용 |
 
-`enable = 0`이면 위 정책과 무관하게 `level = 0`, `device = MULTIPLE_OR_NONE`, `code = FAULT_NONE`, `fault_valid = 0`이며 **새 IRQ Pending을 만들지 않습니다.**
+`enable = 0`이면 위 정책과 무관하게 `level = 0`, `device = MULTIPLE_OR_NONE`, `code = FAULT_NONE`, `fault_valid = 0`이며 새 IRQ Pending을 만들지 않습니다.
 
 ---
 
@@ -274,23 +271,30 @@ wire [2:0] persist_hit = {
 `fault_level`만 보고 시스템 상태를 결정합니다. Fault를 새로 판정하지 않습니다.
 
 ```text
-                 ┌──────────────┐
-                 │   NORMAL     │◄──────────────────────┐
-                 └──┬───┬───┬───┘                       │
-       level 1 즉시 │   │   │ level 3 즉시               │ level 0 × RECOVERY_COUNT
-                    ▼   │   ▼                           │ (eval_tick 기준)
-              ┌──────────┐  └─────────────┐             │
-              │ WARNING  │────level 3 즉시─┤             │
-              └────┬─────┘                 │             │
-     level 2 즉시  │  ▲ level 1 × COUNT    │             │
-                   ▼  │                    ▼             │
-              ┌──────────┐          ┌────────────────┐   │
-              │ DEGRADED │──level3─►│   SAFE_MODE    │   │
-              └────┬─────┘  즉시     │  (자동복구 없음) │   │
-                   │                └───────┬────────┘   │
-                   └── level 0 × COUNT ─────┼────────────┘
-                                            │
-                    MANUAL_RESET(W1P) && fault_valid && level==0
+        [악화]  다음 클럭 즉시 전환
+
+        ┌────────────────────────┐
+        │         NORMAL         │
+        └───────────┬────────────┘
+                    │  fault_level 1
+        ┌───────────▼────────────┐
+        │        WARNING         │
+        └───────────┬────────────┘
+                    │  fault_level 2
+        ┌───────────▼────────────┐
+        │        DEGRADED        │
+        └───────────┬────────────┘
+                    │  fault_level 3      (NORMAL · WARNING 에서도 즉시 진입)
+        ┌───────────▼─────────────────────────────────────────┐
+        │                      SAFE_MODE                      │
+        └─────────────────────────────────────────────────────┘
+
+  [복구]  eval_tick 기준 RECOVERY_COUNT회 연속 확인될 때만
+        DEGRADED  → WARNING  :  fault_level 1 지속
+        DEGRADED  → NORMAL   :  fault_level 0 지속
+        WARNING   → NORMAL   :  fault_level 0 지속
+        SAFE_MODE → NORMAL   :  자동 복구 없음 —
+                                MANUAL_RESET(W1P) && fault_valid && fault_level == 0
 ```
 
 | 규칙 | 내용 |
@@ -328,7 +332,7 @@ if (enable && fault_valid) begin
 end
 ```
 
-`state_timer`는 상태가 바뀌면 0, 유지되면 `0xFFFF_FFFF`까지 포화 증가합니다. `state_change_event`는 **실제로 상태가 바뀌는 클럭에만** 1클럭 펄스입니다.
+`state_timer`는 상태가 바뀌면 0, 유지되면 `0xFFFF_FFFF`까지 포화 증가합니다. `state_change_event`는 실제로 상태가 바뀌는 클럭에만 1클럭 펄스입니다.
 
 ### 6.2 레지스터 맵 (`0x44A20000`)
 
@@ -386,7 +390,7 @@ module eval_tick_generator #(parameter integer DIVISOR = 100_000) (
 
 ### 9.1 부팅 순서
 
-개별 IP마다 "Disable → 설정 → Clear"를 돌리면, MicroBlaze만 재시작하고 AXI 주변 IP는 리셋되지 않는 상황(디버거 CPU Reset)에서 **재설정 중인 IP의 과도기 출력을 다른 IP가 Enable 상태로 읽어** 엉뚱한 Fault/State 이벤트를 만듭니다. 그래서 전역 단계로 분리했습니다.
+개별 IP마다 "Disable → 설정 → Clear"를 돌리면, MicroBlaze만 재시작하고 AXI 주변 IP는 리셋되지 않는 상황(디버거 CPU Reset)에서 재설정 중인 IP의 과도기 출력을 다른 IP가 Enable 상태로 읽어 엉뚱한 Fault/State 이벤트를 만듭니다. 그래서 전역 단계로 분리했습니다.
 
 ```text
 1~2. HB/FM/SC 전부 Disable  +  세 IRQ 전부 Disable
@@ -404,7 +408,7 @@ module eval_tick_generator #(parameter integer DIVISOR = 100_000) (
 
 ### 9.2 ISR Snapshot Ring
 
-메인 루프가 `TICK_MS`(5 ms)마다 폴링해 직전 값과 비교하면, **폴링 주기보다 짧게 스쳐 가는 상태가 통째로 사라집니다.** `eval_tick`이 1 ms이고 `PERSIST_LIMIT = 5`이므로 `WARNING`(Level 1)은 정확히 5 ms만 유지됩니다.
+메인 루프가 `TICK_MS`(5 ms)마다 폴링해 직전 값과 비교하면, 폴링 주기보다 짧게 스쳐 가는 상태를 놓칩니다. `eval_tick`이 1 ms이고 `PERSIST_LIMIT = 5`이므로 `WARNING`(Level 1)은 정확히 5 ms만 유지됩니다.
 
 ```c
 typedef struct {
@@ -421,7 +425,7 @@ typedef struct {
 
 ### 9.3 논블로킹 UART 송신
 
-`xil_printf`는 한 줄을 다 내보낼 때까지 블로킹합니다. 9600 bps에서 `$MISSION` 한 줄(약 80 byte)이면 **83 ms**이고, 그동안 아무도 UARTLite의 16 byte RX FIFO를 비우지 않아 그 사이 도착한 GUI 명령(18~23 byte)의 뒷부분과 개행이 잘려 명령이 통째로 유실됩니다.
+`xil_printf`는 한 줄을 다 내보낼 때까지 블로킹합니다. 9600 bps에서 `$MISSION` 한 줄(약 80 byte)이면 83 ms이고, 그동안 아무도 UARTLite의 16 byte RX FIFO를 비우지 않아 그 사이 도착한 GUI 명령(18~23 byte)의 뒷부분과 개행이 잘려 명령 전체가 유실됩니다.
 
 ```c
 /* PROTO_Printf: 한 글자를 TX FIFO에 넣을 때마다 RX FIFO를 Ring Buffer로 옮긴다.
@@ -454,7 +458,7 @@ void HBGEN_Pump(void)
 
 ### 9.5 CTRL Shadow
 
-세 IP 모두 `CTRL`이 RW(`ENABLE`)와 W1P가 섞여 있고, **RTL이 CTRL Write 때마다 `ENABLE`을 `wdata[0]`으로 덮어씁니다.** W1P를 쏠 때 `ENABLE`을 같이 실어 보내지 않으면 IP가 꺼집니다. 그래서 각 드라이버가 RW 비트를 로컬 Shadow로 들고 있다가 항상 함께 씁니다.
+세 IP 모두 `CTRL`이 RW(`ENABLE`)와 W1P가 섞여 있고, RTL이 CTRL Write 때마다 `ENABLE`을 `wdata[0]`으로 덮어씁니다. W1P를 쏠 때 `ENABLE`을 같이 실어 보내지 않으면 IP가 꺼집니다. 그래서 각 드라이버가 RW 비트를 로컬 Shadow로 들고 있다가 항상 함께 씁니다.
 
 ```c
 static u32 s_fm_ctrl = 0;
@@ -468,7 +472,7 @@ void FM_ResetFault(void) { REG_WR(FM_BASE, FM_CTRL, s_fm_ctrl | FM_CTRL_RESET_FA
 
 ## 10. UART Protocol
 
-물리 계층은 AXI UARTLite **9600 8N1**, 인코딩은 **ASCII 전용**입니다. 9600 bps 링크에서 바이트가 하나 유실되면 UTF-8 멀티바이트 문자열이 통째로 깨져 보이기 때문입니다(보드 로그에서 확인).
+물리 계층은 AXI UARTLite **9600 8N1**, 인코딩은 **ASCII 전용**입니다. 9600 bps 링크에서 바이트가 하나 유실되면 UTF-8 멀티바이트 문자열 전체가 깨져 보이기 때문입니다(보드 로그에서 확인).
 
 ### 10.1 FPGA → PC
 
@@ -517,7 +521,7 @@ $IRQ,<en_mask>,<hb_status>,<fm_status>,<sc_status>
 SET,IRQ_EN,0  →  고장 주입  →  GET,IRQ (Pending 확인)  →  CMD,CLEAR_IRQ  →  GET,IRQ (0 확인)
 ```
 
-`IRQ_STATUS`의 Set은 `IRQ_EN`과 무관하므로(`assign irq = reg_irq_status & reg_irq_en;`) `IRQ_EN`을 꺼도 Pending은 그대로 쌓입니다. **검증 목적으로만 끄고 반드시 되돌립니다.**
+`IRQ_STATUS`의 Set은 `IRQ_EN`과 무관하므로(`assign irq = reg_irq_status & reg_irq_en;`) `IRQ_EN`을 꺼도 Pending은 그대로 쌓입니다. 검증 목적으로만 끄고, 확인 후 되돌립니다.
 
 ---
 
@@ -525,7 +529,7 @@ SET,IRQ_EN,0  →  고장 주입  →  GET,IRQ (Pending 확인)  →  CMD,CLEAR_
 
 ### 안전 설계 원칙
 
-**이 앱은 안전 판단을 수행하지 않습니다.**
+이 앱은 안전 판단을 수행하지 않습니다.
 
 - 앱이 종료되거나 UART가 끊겨도 FPGA의 Fault 판단과 SAFE_MODE 전환에는 영향이 없습니다.
 - 수신값을 그대로 표시하고 앱이 계산한 값으로 덮어쓰지 않습니다.
@@ -563,7 +567,7 @@ SET,IRQ_EN,0  →  고장 주입  →  GET,IRQ (Pending 확인)  →  CMD,CLEAR_
 | `LD14:LD13` | 2 | `fault_level` | 0~3 |
 | `LD15` | 1 | `fault_valid` | Fault Manager Enable과 동일 |
 
-Block Design 최상위 외부 포트는 `sys_clock`(W5), `reset`(btnC, U18), `usb_uart_rxd/txd`(B18/A18), `led[15:0]` **4개뿐**입니다. 슬라이드 스위치·btnU·btnD를 통한 물리 조작 경로는 설계 의도로만 문서에 남기고 이번 빌드에는 배선하지 않았으며, 검증·시연은 전부 UART 경로로 수행했습니다. RGB LED / FND도 미구현이며 같은 정보를 `LD1:LD0`와 `LD14:LD13`으로 대체 표시합니다.
+Block Design 최상위 외부 포트는 `sys_clock`(W5), `reset`(btnC, U18), `usb_uart_rxd/txd`(B18/A18), `led[15:0]` 4개뿐입니다. 슬라이드 스위치·btnU·btnD를 통한 물리 조작 경로는 설계 의도로만 문서에 남기고 이번 빌드에는 배선하지 않았으며, 검증·시연은 전부 UART 경로로 수행했습니다. RGB LED / FND도 미구현이며 같은 정보를 `LD1:LD0`와 `LD14:LD13`으로 대체 표시합니다.
 
 ---
 
@@ -583,7 +587,7 @@ Block Design 최상위 외부 포트는 `sys_clock`(W5), `reset`(btnC, U18), `us
 | `tb_mission_soc_top` | 61 | 0 |
 | **합계** | **4,533** | **0** |
 
-- `tb_fault_manager_core`는 Fault 정책 Reference Model과 **4,096 조합 전수 비교**를 포함합니다. 같은 규칙을 `mssion_soc_working/docs/fault_policy_table.md` 생성 모델과 공유합니다.
+- `tb_fault_manager_core`는 Fault 정책 Reference Model과의 전수 대조를 포함합니다 — 입력 512조합(`timeout`·`error`·`critical` 각 3비트) × `CRITICAL_MASK` 4종 × 지속/비지속 2종 = **4,096회 대조**. 같은 규칙을 `mssion_soc_working/docs/fault_policy_table.md` 생성 모델과 공유합니다.
 - `tb_*_axi` 3종은 **AW/W 도착 순서 변경, WSTRB 부분 쓰기, BREADY/RREADY backpressure, 백투백 연속 요청, AXI Protocol Monitor(Stall 중 VALID/Payload 변경 감시)** 를 포함합니다.
 - `tb_mission_soc_top`은 `mission_soc.bd`의 net 배선을 그대로 옮긴 통합 TB로, `NORMAL → WARNING → DEGRADED → SAFE_MODE → (manual reset) → NORMAL` 전이와 전역 Disable 안전 출력을 체인 전체에서 확인합니다.
 
@@ -607,7 +611,7 @@ Block Design 최상위 외부 포트는 `sys_clock`(W5), `reset`(btnC, U18), `us
 | Total Power | 0.202 W | |
 | Methodology `TIMING-6` Critical Warning | `0` | 판정 기준 충족 |
 
-남은 Methodology Warning은 `TIMING-9` ×1(Unknown CDC), `TIMING-18` ×19(비동기 외부 I/O — `reset`, `usb_uart_rxd/txd`, `led[15:0]`에는 참조 클럭이 없어 의도적 예외), `LUTAR-1` ×2(`microblaze_riscv` IP 내부 Serial Debug Interface — 수정 대상 아님)이며 **전 항목이 `Related violations: <none>`** 입니다.
+남은 Methodology Warning은 `TIMING-9` ×1(Unknown CDC), `TIMING-18` ×19(비동기 외부 I/O — `reset`, `usb_uart_rxd/txd`, `led[15:0]`에는 참조 클럭이 없어 의도적 예외), `LUTAR-1` ×2(`microblaze_riscv` IP 내부 Serial Debug Interface — 수정 대상 아님)이며 전 항목이 `Related violations: <none>`입니다.
 
 > ⚠ `mssion_soc_working/Mission_SoC_PPT_Audit_v3.md`에는 다른 시점의 routed 수치(WNS `+0.198 ns`, WHS `+0.033 ns`, LUT 3,039)가 남아 있습니다. 위 표는 `mssion_soc_working/docs/mission_soc_impl_methodology.md`의 2026-07-30 재구현 결과 기준입니다.
 
@@ -622,10 +626,10 @@ Block Design 최상위 외부 포트는 `sys_clock`(W5), `reset`(btnC, U18), `us
 | Problem | Cause | Applied Solution |
 |---|---|---|
 | Critical Warning `TIMING-6` ×2, multiple-clock register pin 2,730 | Block Design의 `clk_wiz` 자동 클럭 제약 위에 Digilent 마스터 XDC가 `create_clock -add`로 클럭을 하나 더 얹음 | XDC의 해당 줄 제거 → primary clock 1개. `TIMING-6` / `TIMING-56` / multiple_clock 전부 0 |
-| 보드 로그에 `STATE_CHANGE,WARNING`이 한 줄도 없음. `FAULT_CHANGE`가 level 0 → 2로 1을 건너뜀 | 메인 루프 폴링 주기(5 ms)와 WARNING 유지 시간(`eval_tick` 1 ms × `PERSIST_LIMIT` 5 = 5 ms)이 같아 상태가 통째로 사라짐 | ISR이 IRQ 진입 순간의 값을 깊이 16 Snapshot Ring에 저장. 폴링은 백스톱으로만 유지 |
-| GUI 명령이 통째로 유실됨 (프리셋 버튼처럼 명령 2개를 한 번에 쏘면 확정 유실) | `xil_printf`가 `$MISSION` 한 줄(≈80 byte, 83 ms)을 블로킹 송신하는 동안 아무도 16 byte RX FIFO를 비우지 않음 | `PROTO_Printf` — TX 한 글자마다 RX FIFO를 Ring Buffer로 퍼담음 |
+| 보드 로그에 `STATE_CHANGE,WARNING`이 한 줄도 없음. `FAULT_CHANGE`가 level 0 → 2로 1을 건너뜀 | 메인 루프 폴링 주기(5 ms)와 WARNING 유지 시간(`eval_tick` 1 ms × `PERSIST_LIMIT` 5 = 5 ms)이 같아 상태를 관측하지 못함 | ISR이 IRQ 진입 순간의 값을 깊이 16 Snapshot Ring에 저장. 폴링은 백스톱으로만 유지 |
+| GUI 명령 전체가 유실됨 (프리셋 버튼처럼 명령 2개를 한 번에 쏘면 확정 유실) | `xil_printf`가 `$MISSION` 한 줄(≈80 byte, 83 ms)을 블로킹 송신하는 동안 아무도 16 byte RX FIFO를 비우지 않음 | `PROTO_Printf` — TX 한 글자마다 RX FIFO를 Ring Buffer로 퍼담음 |
 | `printf` 계열을 링크하면 이미지가 LMB BRAM 128 KB를 초과 | newlib `printf` 크기 | `%u %d %s %x %02x %08x %%`만 지원하는 최소 포맷터 자체 구현 |
-| UART 문자열이 통째로 깨져 보임 | 9600 bps에서 바이트 1개 유실 시 UTF-8 멀티바이트 문자열 전체가 깨짐 | 출력 전부 ASCII 전용으로 고정 |
+| UART 문자열 전체가 깨져 보임 | 9600 bps에서 바이트 1개 유실 시 UTF-8 멀티바이트 문자열 전체가 깨짐 | 출력 전부 ASCII 전용으로 고정 |
 | 디버거 CPU Reset 후 엉뚱한 Fault/State 이벤트 발생 | IP별로 "Disable → 설정 → Clear"를 순차 실행 → 재설정 중인 IP의 과도기 출력을 다른 IP가 Enable 상태로 읽음 | 전역 단계 분리: 세 IP 전부 Disable → 전체 설정 → 전체 Clear → Enable |
 | 부팅 시 `FM_ResetFault()`가 무시됨 | GPIO로 주입한 `error`/`critical`은 CPU Reset으로 지워지지 않아 `device_fault`가 살아 있음 | 설정 시작 전에 `INJ_ClearAll()`을 먼저 수행 |
 | W1P를 쏘면 IP가 꺼짐 | `CTRL`이 RW(`ENABLE`) + W1P 혼합이고 RTL이 Write마다 `ENABLE`을 `wdata[0]`으로 덮어씀 | 각 드라이버가 RW 비트를 CTRL Shadow로 보관하고 항상 함께 write |
@@ -660,7 +664,7 @@ SOC_Project/
     │
     ├── sim/                                 # 단위 및 통합 Testbench
     │   ├── tb_heartbeat_monitor.v
-    │   ├── tb_fault_manager_core.v          # Reference Model 4,096 조합 전수 비교
+    │   ├── tb_fault_manager_core.v          # Reference Model 전수 대조 (4,096회)
     │   ├── tb_fault_manager_axi.v
     │   ├── tb_safety_controller_core.v
     │   ├── tb_safety_controller_axi.v
@@ -731,7 +735,7 @@ SOC_Project/
 | [`rtl/eval_tick_generator.v`](./mssion_soc_working/rtl/eval_tick_generator.v) | B·C 공유 1 ms 시간축 |
 | [`SOC_Pr/ip_repo/myip_heartbeat_monitor_1_0/src/heartbeat_monitor.v`](./mssion_soc_working/SOC_Pr/ip_repo/myip_heartbeat_monitor_1_0/src/heartbeat_monitor.v) | 2FF 동기화, Saturating Counter, AXI Wrapper |
 | [`SOC_Pr/ip_repo/safety_controller_1_0/hdl/safety_controller.v`](./mssion_soc_working/SOC_Pr/ip_repo/safety_controller_1_0/hdl/safety_controller.v) | 4-State FSM, SAFE_MODE Latch, 상태별 출력 정책 |
-| [`sim/tb_fault_manager_core.v`](./mssion_soc_working/sim/tb_fault_manager_core.v) | Reference Model 전수 비교 (4,146 checks) |
+| [`sim/tb_fault_manager_core.v`](./mssion_soc_working/sim/tb_fault_manager_core.v) | Reference Model 전수 대조 (4,146 checks) |
 | [`sim/tb_mission_soc_top.v`](./mssion_soc_working/sim/tb_mission_soc_top.v) | 세 IP 체인 통합 시나리오 검증 |
 | [`SOC_Pr_Vitis/soc_prj/src/mission_ip_regs.h`](./mssion_soc_working/SOC_Pr_Vitis/soc_prj/src/mission_ip_regs.h) | 레지스터 Offset·인코딩·권장 초기값 단일 소스 |
 | [`SOC_Pr_Vitis/soc_prj/src/main.c`](./mssion_soc_working/SOC_Pr_Vitis/soc_prj/src/main.c) | 부팅 13단계, Snapshot Drain, 폴링 백스톱 |
@@ -788,10 +792,10 @@ python app.py            # 또는 python -m mission_dashboard
 
 ### Result
 
-- 안전 판단 경로에서 소프트웨어를 완전히 배제 — **MicroBlaze가 멈춰도 Fault 판정과 SAFE_MODE 전환이 계속 동작**하는 구조 구현
+- 안전 판단 경로에서 소프트웨어를 배제 — **MicroBlaze가 멈춰도 Fault 판정과 SAFE_MODE 전환이 계속 동작**하는 구조 구현
 - Custom IP 3종을 AXI4-Lite부터 직접 구현 (AW/W 독립 수신 후 1회 Commit, WSTRB 부분 쓰기, W1P / W1C / RO 혼합 레지스터)
 - 두 개의 시간 축(즉시 판정 vs 공통 `eval_tick`)을 분리해 IP 간 정책 관계(`RECOVERY_COUNT < PERSIST_LIMIT`)가 성립하는 설계
-- Fault 정책 Reference Model **4,096 조합 전수 비교**를 포함해 총 **4,533 checks / 0 fail**
+- Fault 정책 Reference Model 전수 대조(입력 512조합 × mask 4종 × 지속 2종 = 4,096회)를 포함해 총 **4,533 checks / 0 fail**
 - 100 MHz에서 WNS `+0.963 ns` / WHS `+0.029 ns` / Failed Routes 0, Methodology Critical Warning 0
 - 폴링으로는 관측 불가능한 5 ms 전이를 ISR Snapshot Ring으로 포착해 `$EVENT` 누락 제거
 - 9600 bps 반이중 링크에서 TX 블로킹으로 인한 명령 유실을 문자 단위 RX Pump로 해결
@@ -799,14 +803,14 @@ python app.py            # 또는 python -m mission_dashboard
 
 ### What I Learned
 
-- 안전 시스템에서 **"무엇을 하드웨어에 남길 것인가"** 를 정하는 기준 — 소프트웨어가 죽어도 살아 있어야 하는 경로의 식별
-- AXI4-Lite Slave를 직접 쓰면서 겪는 실제 문제들 (AW/W 순서, backpressure, W1P가 RW 비트를 덮어쓰는 문제와 CTRL Shadow)
-- Level IRQ + W1C 설계에서 `irq = status & en` 구조가 만드는 검증 가능성 — `IRQ_EN`을 꺼야만 Pending을 관측할 수 있다는 점
-- 폴링 주기와 상태 유지 시간이 같은 스케일일 때 **관측 자체가 불가능**해지는 문제와 그 구조적 해법
-- 저속 직렬 링크에서 블로킹 송신이 수신을 굶기는 half-duplex 병목, 그리고 문자 단위 인터리빙으로 푸는 방법
-- 클럭 제약 중복 정의 하나가 multiple-clock register pin 2,730건을 만드는 것처럼, **제약 파일이 타이밍 리포트 전체를 왜곡**할 수 있다는 것
-- Reference Model 전수 비교가 조합 논리 정책 검증에서 갖는 압도적인 비용 대비 효과
-- 세 사람이 나눠 만든 IP를 통합할 때 **레지스터 Offset과 인코딩을 단일 헤더로 고정**하고 변경을 Change Request로 묶는 규율의 필요성
+- 어떤 경로를 하드웨어에 남길지 정하려면, 먼저 "소프트웨어가 멈춰도 살아 있어야 하는 경로"를 골라내야 했습니다.
+- AXI4-Lite Slave를 직접 작성하면서 AW/W 순서, backpressure, W1P Write가 RW 비트를 덮어쓰는 문제를 겪었고 CTRL Shadow로 해결했습니다.
+- `irq = status & en` 구조에서는 `IRQ_EN`을 꺼야 Pending을 관측할 수 있습니다. 검증 절차를 여기에 맞춰 짰습니다.
+- 폴링 주기와 상태 유지 시간이 같은 스케일이면 상태를 관측하는 것 자체가 불가능합니다. 스냅샷 링을 쓴 이유입니다.
+- 저속 직렬 링크에서 블로킹 송신은 수신을 굶깁니다. 송신 문자 사이에 RX 펌프를 끼워 넣어 풀었습니다.
+- 클럭 제약 중복 정의 하나로 multiple-clock register pin이 2,730건 잡혔습니다. 제약 파일이 타이밍 리포트 전체를 왜곡할 수 있다는 걸 이때 알았습니다.
+- 조합 논리 정책은 Reference Model 전수 대조가 테스트벤치를 손으로 늘리는 것보다 싸게 먹혔습니다.
+- 세 명이 나눠 만든 IP를 합칠 때는 레지스터 Offset과 인코딩을 단일 헤더로 고정하고, 변경을 Change Request로 묶어야 어긋나지 않았습니다.
 
 ---
 
@@ -825,8 +829,6 @@ python app.py            # 또는 python -m mission_dashboard
 ---
 
 <div align="center">
-
-**FPGA · Verilog · Custom AXI4-Lite IP · MicroBlaze RISC-V · Safety FSM · SoC Integration**
 
 GitHub: [@LDdd130](https://github.com/LDdd130)
 
