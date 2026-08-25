@@ -76,55 +76,10 @@ PC 대시보드(PySide6)는 양방향 제어 단말이지만 안전 판단은 �
 
 ## 3. System Architecture
 
-```text
-                        ┌──────────── FPGA (Basys 3) ───────────────────────────────┐
-                        │                                                           │
- axi_gpio_1 CH1 ───────►│ heartbeat_async[2:0]                                      │
- (MicroBlaze가 생성)    │        ▼                                                  │
-                        │  ┌───────────────────────┐                                │
-                        │  │ heartbeat_monitor_ip  │ (A)                            │
-                        │  │  2FF 동기화 + Edge    │                                │
-                        │  │  장치별 경과 Counter  │                                │
-                        │  │  Timeout / Alive 판정 │                                │
-                        │  └───────┬───────────────┘                                │
-                        │          │ timeout[2:0]        alive[2:0] ──► LED         │
- axi_gpio_0 CH1 ───────►│ error_flag[2:0]                                           │
- axi_gpio_0 CH2 ───────►│ critical_fault[2:0]                                       │
-                        │          ▼                                                │
-                        │  ┌──────────────────────┐         ┌────────────────────┐  │
-                        │  │  fault_manager_ip    │ (B) ◄───┤ eval_tick_generator│  │
-                        │  │  중요도 · 지속 횟수  │         │ 100,000 clk = 1 ms │  │
-                        │  │  Fault Level 결정    │         └────────┬───────────┘  │
-                        │  └───────┬──────────────┘                  │              │
-                        │          │ fault_level[1:0]                │              │
-                        │          │ fault_device[1:0]               │              │
-                        │          │ fault_code[7:0]                 │              │
-                        │          │ fault_valid                     │              │
-                        │          ▼                                 ▼              │
-                        │  ┌───────────────────────────────────────────┐            │
-                        │  │        safety_controller_ip (C)           │            │
-                        │  │  상태 FSM · SAFE_MODE Latch · 출력 제어   │            │
-                        │  └───────┬───────────────────────────────────┘            │
-                        │          │ system_state[1:0] / output_enable[2:0]         │
-                        │          │ actuator_enable / control_valid                │
-                        │          ▼                                                │
-                        │      led_concat ──► led[15:0] (LD0~LD15)                  │
-                        │                                                           │
-                        │  각 IP ── AXI4-Lite ──┐                                   │
-                        │  각 IP irq ── xlconcat ── AXI INTC ──┐                    │
-                        └──────────────────────────────────────┼────────────────────┘
-                                                  ▼            ▼
-                                          ┌──────────────────────────┐
-                                          │ MicroBlaze RISC-V        │
-                                          │  설정 · IRQ 수집 · 보고  │
-                                          └───────────┬──────────────┘
-                                                      │ AXI UARTLite 9600 8N1
-                                                      ▼
-                                          ┌──────────────────────────┐
-                                          │ PC Dashboard (PySide6)   │
-                                          │  모니터링 · 명령 · CSV   │
-                                          └──────────────────────────┘
-```
+<p align="center">
+  <img src="./mssion_soc_working/asset/architecture.svg" width="100%"
+       alt="Mission SoC 시스템 아키텍처 — Heartbeat Monitor, Fault Manager, Safety Controller가 RTL 신호로 직접 연결되고 MicroBlaze와 PC 대시보드는 설정과 보고를 담당한다.">
+</p>
 
 `alive`는 Fault Manager 입력이 아닙니다. Fault Manager에는 `timeout`만 직접 연결하고, `alive`는 LED와 상태 표시용으로만 씁니다.
 
@@ -270,32 +225,10 @@ wire [2:0] persist_hit = {
 
 `fault_level`만 보고 시스템 상태를 결정합니다. Fault를 새로 판정하지 않습니다.
 
-```text
-        [악화]  다음 클럭 즉시 전환
-
-        ┌────────────────────────┐
-        │         NORMAL         │
-        └───────────┬────────────┘
-                    │  fault_level 1
-        ┌───────────▼────────────┐
-        │        WARNING         │
-        └───────────┬────────────┘
-                    │  fault_level 2
-        ┌───────────▼────────────┐
-        │        DEGRADED        │
-        └───────────┬────────────┘
-                    │  fault_level 3      (NORMAL · WARNING 에서도 즉시 진입)
-        ┌───────────▼─────────────────────────────────────────┐
-        │                      SAFE_MODE                      │
-        └─────────────────────────────────────────────────────┘
-
-  [복구]  eval_tick 기준 RECOVERY_COUNT회 연속 확인될 때만
-        DEGRADED  → WARNING  :  fault_level 1 지속
-        DEGRADED  → NORMAL   :  fault_level 0 지속
-        WARNING   → NORMAL   :  fault_level 0 지속
-        SAFE_MODE → NORMAL   :  자동 복구 없음 —
-                                MANUAL_RESET(W1P) && fault_valid && fault_level == 0
-```
+<p align="center">
+  <img src="./mssion_soc_working/asset/safety_controller.svg" width="100%"
+       alt="Safety Controller 상태 전이 — 위험도 상승은 다음 클럭에 즉시 반영하고 복구는 RECOVERY_COUNT회 연속 확인하며 SAFE_MODE는 수동 Reset으로만 해제한다.">
+</p>
 
 | 규칙 | 내용 |
 |---|---|
