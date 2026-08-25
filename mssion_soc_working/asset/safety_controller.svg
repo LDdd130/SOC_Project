@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="640" viewBox="0 0 980 640" role="img" aria-labelledby="ttl desc">
+  <title id="ttl">Safety Controller 상태 전이</title>
+  <desc id="desc">NORMAL, WARNING, DEGRADED, SAFE_MODE의 악화 전이와 연속 확인 기반 복구 조건, SAFE_MODE 수동 복구 조건을 나타낸다.</desc>
+  <defs>
+    <style>
+      .bg{fill:#fff}.panel{fill:#f6f8fa;stroke:#d0d7de}.card{fill:#fff;stroke:#8c959f}
+      .fillA{fill:#ddf4ff;stroke:#54aeff}.fillB{fill:#ffebe9;stroke:#ff8182}.fillC{fill:#fbefff;stroke:#d8b9ff}.fillN{fill:#eef1f4;stroke:#afb8c1}
+      .t{fill:#1f2328;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif}.m,.lbl{fill:#656d76;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif}.k{fill:#1f2328;font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace}
+      .hdr{fill:#0969da;font:700 14px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}.hdrB{fill:#cf222e;font:700 14px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}.hdrC{fill:#8250df;font:700 14px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}
+      .wire{stroke:#7d8590;fill:none;stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}.danger{stroke:#cf222e;fill:none;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+      @media(prefers-color-scheme:dark){.bg{fill:#0d1117}.panel{fill:#161b22;stroke:#30363d}.card{fill:#0d1117;stroke:#6e7681}.fillA{fill:#12283f;stroke:#316dca}.fillB{fill:#3c1618;stroke:#b62324}.fillC{fill:#271052;stroke:#8957e5}.fillN{fill:#21262d;stroke:#484f58}.t,.k{fill:#e6edf3}.m,.lbl{fill:#9198a1}.hdr{fill:#58a6ff}.hdrB{fill:#ff7b72}.hdrC{fill:#d2a8ff}.wire{stroke:#7d8590}.danger{stroke:#ff7b72}}
+    </style>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#7d8590"/></marker>
+    <marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#cf222e"/></marker>
+  </defs>
+
+  <rect class="bg" width="980" height="640"/>
+  <rect x="24" y="24" width="420" height="592" rx="10" class="panel" stroke-width="1.2"/>
+  <text x="44" y="51" class="hdrB">악화 경로</text>
+  <text x="120" y="51" class="m" font-size="11">eval_tick을 기다리지 않고 다음 클럭에 전환</text>
+
+  <rect x="70" y="78" width="328" height="62" rx="7" class="fillA" stroke-width="1.2"/>
+  <text x="84" y="103" class="k" font-size="12.5" font-weight="700">NORMAL</text>
+  <text x="84" y="124" class="m" font-size="10">정상 출력 허용</text>
+  <line x1="234" y1="140" x2="234" y2="186" class="danger" marker-end="url(#ahr)"/>
+  <text x="249" y="167" class="lbl" font-size="9.5">fault_level = 1</text>
+
+  <rect x="70" y="186" width="328" height="62" rx="7" class="fillN" stroke-width="1.2"/>
+  <text x="84" y="211" class="k" font-size="12.5" font-weight="700">WARNING</text>
+  <text x="84" y="232" class="m" font-size="10">경고 상태 · 제한된 출력 정책</text>
+  <line x1="234" y1="248" x2="234" y2="294" class="danger" marker-end="url(#ahr)"/>
+  <text x="249" y="275" class="lbl" font-size="9.5">fault_level = 2</text>
+
+  <rect x="70" y="294" width="328" height="62" rx="7" class="fillB" stroke-width="1.2"/>
+  <text x="84" y="319" class="k" font-size="12.5" font-weight="700">DEGRADED</text>
+  <text x="84" y="340" class="m" font-size="10">필수 기능만 유지</text>
+  <line x1="234" y1="356" x2="234" y2="412" class="danger" marker-end="url(#ahr)"/>
+  <text x="249" y="388" class="lbl" font-size="9.5">fault_level = 3</text>
+
+  <rect x="70" y="412" width="328" height="74" rx="7" class="fillB" stroke-width="1.2"/>
+  <text x="84" y="438" class="k" font-size="12.5" font-weight="700">SAFE_MODE</text>
+  <text x="84" y="459" class="m" font-size="10">Latch 유지 · 자동 복구 없음</text>
+  <text x="84" y="476" class="m" font-size="10">출력은 안전값으로 차단</text>
+
+  <rect x="52" y="514" width="364" height="74" rx="7" class="card" stroke-width="1.2"/>
+  <text x="66" y="537" class="k" font-size="10.5" font-weight="600">fault_level = 3</text>
+  <text x="66" y="557" class="t" font-size="10">NORMAL·WARNING에서도 SAFE_MODE로 즉시 진입</text>
+  <text x="66" y="575" class="m" font-size="9.5">상태가 더 위험해지는 전이는 지연하지 않음</text>
+
+  <rect x="466" y="24" width="490" height="592" rx="10" class="panel" stroke-width="1.2"/>
+  <text x="486" y="51" class="hdr">복구 경로</text>
+  <text x="562" y="51" class="m" font-size="11">eval_tick에서 RECOVERY_COUNT회 연속 확인</text>
+
+  <rect x="490" y="78" width="126" height="44" rx="6" class="fillB" stroke-width="1.2"/>
+  <text x="553" y="105" class="k" font-size="10.5" text-anchor="middle" font-weight="700">DEGRADED</text>
+  <line x1="616" y1="100" x2="790" y2="100" class="wire" marker-end="url(#ah)"/>
+  <rect x="790" y="78" width="142" height="44" rx="6" class="fillN" stroke-width="1.2"/>
+  <text x="861" y="105" class="k" font-size="10.5" text-anchor="middle" font-weight="700">WARNING</text>
+  <text x="703" y="90" class="lbl" font-size="9" text-anchor="middle">level 1 지속</text>
+
+  <rect x="490" y="148" width="126" height="44" rx="6" class="fillB" stroke-width="1.2"/>
+  <text x="553" y="175" class="k" font-size="10.5" text-anchor="middle" font-weight="700">DEGRADED</text>
+  <line x1="616" y1="170" x2="790" y2="170" class="wire" marker-end="url(#ah)"/>
+  <rect x="790" y="148" width="142" height="44" rx="6" class="fillA" stroke-width="1.2"/>
+  <text x="861" y="175" class="k" font-size="10.5" text-anchor="middle" font-weight="700">NORMAL</text>
+  <text x="703" y="160" class="lbl" font-size="9" text-anchor="middle">level 0 지속</text>
+
+  <rect x="490" y="218" width="126" height="44" rx="6" class="fillN" stroke-width="1.2"/>
+  <text x="553" y="245" class="k" font-size="10.5" text-anchor="middle" font-weight="700">WARNING</text>
+  <line x1="616" y1="240" x2="790" y2="240" class="wire" marker-end="url(#ah)"/>
+  <rect x="790" y="218" width="142" height="44" rx="6" class="fillA" stroke-width="1.2"/>
+  <text x="861" y="245" class="k" font-size="10.5" text-anchor="middle" font-weight="700">NORMAL</text>
+  <text x="703" y="230" class="lbl" font-size="9" text-anchor="middle">level 0 지속</text>
+
+  <rect x="490" y="304" width="126" height="50" rx="6" class="fillB" stroke-width="1.2"/>
+  <text x="553" y="334" class="k" font-size="10.5" text-anchor="middle" font-weight="700">SAFE_MODE</text>
+  <line x1="616" y1="329" x2="790" y2="329" class="wire" marker-end="url(#ah)"/>
+  <rect x="790" y="304" width="142" height="50" rx="6" class="fillA" stroke-width="1.2"/>
+  <text x="861" y="334" class="k" font-size="10.5" text-anchor="middle" font-weight="700">NORMAL</text>
+  <text x="703" y="315" class="lbl" font-size="8.8" text-anchor="middle">MANUAL_RESET(W1P)</text>
+  <text x="703" y="347" class="lbl" font-size="8.8" text-anchor="middle">valid · level 0</text>
+
+  <rect x="490" y="390" width="442" height="82" rx="7" class="card" stroke-width="1.2"/>
+  <text x="504" y="414" class="k" font-size="10.5" font-weight="600">연속성 규칙</text>
+  <text x="504" y="435" class="t" font-size="10">recovery_target이 바뀌거나 조건이 끊기면 Count = 0</text>
+  <text x="504" y="454" class="m" font-size="9.5">횟수는 공통 eval_tick에서만 증가</text>
+
+  <rect x="490" y="492" width="442" height="96" rx="7" class="fillC" stroke-width="1.2"/>
+  <text x="504" y="516" class="k" font-size="10.5" font-weight="600">출력 차단 조건</text>
+  <text x="504" y="537" class="t" font-size="10">fault_valid = 0  →  상태 유지 · Count 리셋 · 안전값 출력</text>
+  <text x="504" y="557" class="t" font-size="10">enable = 0       →  NORMAL 초기값 · 출력 차단</text>
+  <text x="504" y="576" class="m" font-size="9.5">두 조건 모두 새 상태 변화 Event를 만들지 않음</text>
+</svg>

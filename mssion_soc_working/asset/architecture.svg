@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="860" viewBox="0 0 980 860" role="img" aria-labelledby="ttl desc">
+  <title id="ttl">Mission SoC 시스템 아키텍처</title>
+  <desc id="desc">Heartbeat Monitor, Fault Manager, Safety Controller가 RTL 신호로 직접 이어지는 안전 경로와 MicroBlaze 및 PC 대시보드의 설정·보고 경로를 나타낸다.</desc>
+  <defs>
+    <style>
+      .bg{fill:#fff}.panel{fill:#f6f8fa;stroke:#d0d7de}.card{fill:#fff;stroke:#8c959f}
+      .fillA{fill:#ddf4ff;stroke:#54aeff}.fillB{fill:#ffebe9;stroke:#ff8182}.fillC{fill:#fbefff;stroke:#d8b9ff}.fillN{fill:#eef1f4;stroke:#afb8c1}
+      .t{fill:#1f2328;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+      .m,.lbl{fill:#656d76;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+      .k{fill:#1f2328;font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace}
+      .hdr{fill:#0969da;font:700 14px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}
+      .hdrB{fill:#cf222e;font:700 14px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}
+      .hdrC{fill:#8250df;font:700 14px -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}
+      .wire{stroke:#7d8590;fill:none;stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}.wired{stroke:#7d8590;fill:none;stroke-width:1.4;stroke-dasharray:5 4;stroke-linejoin:round}
+      @media(prefers-color-scheme:dark){.bg{fill:#0d1117}.panel{fill:#161b22;stroke:#30363d}.card{fill:#0d1117;stroke:#6e7681}.fillA{fill:#12283f;stroke:#316dca}.fillB{fill:#3c1618;stroke:#b62324}.fillC{fill:#271052;stroke:#8957e5}.fillN{fill:#21262d;stroke:#484f58}.t,.k{fill:#e6edf3}.m,.lbl{fill:#9198a1}.hdr{fill:#58a6ff}.hdrB{fill:#ff7b72}.hdrC{fill:#d2a8ff}.wire,.wired{stroke:#7d8590}}
+    </style>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#7d8590"/></marker>
+  </defs>
+
+  <rect class="bg" width="980" height="860"/>
+  <rect x="24" y="24" width="932" height="572" rx="10" class="panel" stroke-width="1.2"/>
+  <text x="44" y="51" class="hdr">FPGA · Basys 3</text>
+  <text x="166" y="51" class="m" font-size="11">100 MHz · 안전 판단 경로는 AXI와 CPU를 거치지 않음</text>
+
+  <rect x="44" y="96" width="210" height="60" rx="6" class="fillC" stroke-width="1.2"/>
+  <text x="56" y="117" class="k" font-size="10.5" font-weight="600">axi_gpio_1 CH1</text>
+  <text x="56" y="135" class="t" font-size="10.5">heartbeat_async[2:0]</text>
+  <text x="56" y="149" class="m" font-size="9.5">MicroBlaze가 생성</text>
+  <line x1="254" y1="126" x2="320" y2="126" class="wire" marker-end="url(#ah)"/>
+
+  <rect x="320" y="78" width="310" height="104" rx="7" class="fillA" stroke-width="1.2"/>
+  <text x="334" y="100" class="k" font-size="12" font-weight="700">heartbeat_monitor_ip  (A)</text>
+  <text x="334" y="120" class="m" font-size="10">2FF 동기화 · Edge 검출</text>
+  <text x="334" y="137" class="m" font-size="10">장치별 경과 Counter</text>
+  <text x="334" y="154" class="m" font-size="10">Timeout / Alive 판정</text>
+  <text x="334" y="171" class="k" font-size="9.5">timeout[2:0] · alive[2:0]</text>
+
+  <rect x="724" y="96" width="208" height="60" rx="6" class="card" stroke-width="1.2"/>
+  <text x="738" y="118" class="k" font-size="10.5" font-weight="600">alive[2:0]</text>
+  <text x="738" y="137" class="t" font-size="10.5">LED 상태 표시</text>
+  <text x="738" y="150" class="m" font-size="9.5">Fault Manager에는 연결하지 않음</text>
+  <line x1="630" y1="126" x2="724" y2="126" class="wire" marker-end="url(#ah)"/>
+
+  <polyline points="475,182 475,242" class="wire" marker-end="url(#ah)"/>
+  <text x="488" y="216" class="lbl" font-size="9.5">timeout[2:0]</text>
+
+  <rect x="44" y="234" width="210" height="52" rx="6" class="fillC" stroke-width="1.2"/>
+  <text x="56" y="255" class="k" font-size="10.5" font-weight="600">axi_gpio_0 CH1</text>
+  <text x="56" y="274" class="t" font-size="10.5">error_flag[2:0]</text>
+  <line x1="254" y1="260" x2="320" y2="260" class="wire" marker-end="url(#ah)"/>
+
+  <rect x="44" y="302" width="210" height="52" rx="6" class="fillC" stroke-width="1.2"/>
+  <text x="56" y="323" class="k" font-size="10.5" font-weight="600">axi_gpio_0 CH2</text>
+  <text x="56" y="342" class="t" font-size="10.5">critical_fault[2:0]</text>
+  <line x1="254" y1="328" x2="320" y2="328" class="wire" marker-end="url(#ah)"/>
+
+  <rect x="320" y="242" width="310" height="112" rx="7" class="fillB" stroke-width="1.2"/>
+  <text x="334" y="265" class="k" font-size="12" font-weight="700">fault_manager_ip  (B)</text>
+  <text x="334" y="286" class="m" font-size="10">Critical · 다중 고장 즉시 판정</text>
+  <text x="334" y="303" class="m" font-size="10">지속 횟수 기반 Fault 등급화</text>
+  <text x="334" y="320" class="m" font-size="10">Level · Device · Code 결정</text>
+  <text x="334" y="340" class="k" font-size="9.5">fault_valid · irq_pending</text>
+
+  <rect x="724" y="250" width="208" height="72" rx="6" class="fillN" stroke-width="1.2"/>
+  <text x="738" y="273" class="k" font-size="10.5" font-weight="600">eval_tick_generator</text>
+  <text x="738" y="293" class="t" font-size="10.5">100,000 clk = 1 ms</text>
+  <text x="738" y="309" class="m" font-size="9.5">B와 C가 같은 시간축 공유</text>
+  <line x1="724" y1="286" x2="630" y2="286" class="wire" marker-end="url(#ah)"/>
+
+  <polyline points="475,354 475,418" class="wire" marker-end="url(#ah)"/>
+  <text x="488" y="379" class="lbl" font-size="9.5">fault_level · device · code · valid</text>
+  <polyline points="828,322 828,390 600,390 600,418" class="wire" marker-end="url(#ah)"/>
+  <text x="712" y="383" class="lbl" font-size="9.5">eval_tick</text>
+
+  <rect x="320" y="418" width="310" height="98" rx="7" class="fillB" stroke-width="1.2"/>
+  <text x="334" y="441" class="k" font-size="12" font-weight="700">safety_controller_ip  (C)</text>
+  <text x="334" y="462" class="m" font-size="10">상태 FSM · SAFE_MODE Latch</text>
+  <text x="334" y="479" class="m" font-size="10">복구 Count · 수동 Reset</text>
+  <text x="334" y="499" class="k" font-size="9.5">system_state · output_enable</text>
+
+  <rect x="724" y="418" width="208" height="98" rx="6" class="card" stroke-width="1.2"/>
+  <text x="738" y="441" class="k" font-size="10.5" font-weight="600">하드웨어 출력</text>
+  <text x="738" y="462" class="t" font-size="10.5">led[15:0] · LD0~LD15</text>
+  <text x="738" y="479" class="t" font-size="10.5">actuator_enable</text>
+  <text x="738" y="496" class="t" font-size="10.5">control_valid</text>
+  <line x1="630" y1="467" x2="724" y2="467" class="wire" marker-end="url(#ah)"/>
+
+  <rect x="270" y="540" width="460" height="40" rx="20" class="fillN" stroke-width="1.2"/>
+  <text x="500" y="557" class="k" font-size="10.5" text-anchor="middle" font-weight="600">A / B / C  AXI4-Lite · 각 IP irq → xlconcat → AXI INTC</text>
+  <text x="500" y="572" class="m" font-size="9.5" text-anchor="middle">설정·관측 경로 — 안전 판단 경로와 분리</text>
+
+  <line x1="500" y1="580" x2="500" y2="636" class="wire" marker-end="url(#ah)"/>
+  <rect x="290" y="636" width="420" height="76" rx="8" class="fillC" stroke-width="1.2"/>
+  <text x="304" y="660" class="hdrC">MicroBlaze RISC-V</text>
+  <text x="304" y="681" class="t" font-size="10.5">부팅 설정 · IRQ Snapshot · 상태 보고</text>
+  <text x="304" y="699" class="m" font-size="9.5">CPU가 정지해도 A → B → C 안전 체인은 계속 동작</text>
+
+  <line x1="500" y1="712" x2="500" y2="770" class="wire" marker-end="url(#ah)"/>
+  <text x="516" y="744" class="lbl" font-size="10">AXI UARTLite · 9600 · 8N1</text>
+  <rect x="290" y="770" width="420" height="66" rx="8" class="fillA" stroke-width="1.2"/>
+  <text x="304" y="794" class="hdr">PC Dashboard · PySide6</text>
+  <text x="304" y="815" class="t" font-size="10.5">모니터링 · 명령 · 이벤트 로그 · CSV 저장</text>
+  <text x="304" y="829" class="m" font-size="9.5">안전 판단에는 관여하지 않음</text>
+</svg>
