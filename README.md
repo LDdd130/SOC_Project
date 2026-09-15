@@ -41,7 +41,7 @@ PC 대시보드(PySide6)는 양방향 제어 단말이지만 안전 판단은 �
 | 항목 | 내용 |
 |---|---|
 | 프로젝트 형태 | 팀 프로젝트 (3인) |
-| 담당 범위 | **[작성 필요 — 예: `fault_manager_ip` RTL·AXI·검증 / MicroBlaze 통합 펌웨어 / PC 대시보드]** |
+| 담당 범위 | fault_manager IP (RTL · AXI4-Lite · IRQ), MicroBlaze 통합 펌웨어, PySide6 대시보드 |
 | 대상 보드 | Digilent Basys 3 (Xilinx Artix-7, `xc7a35tcpg236-1`) |
 | System Clock | 100 MHz (Block Design의 Clock Wizard) |
 | HDL / Language | Verilog, C (MicroBlaze), Python 3.11+ (대시보드) |
